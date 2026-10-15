@@ -1,5 +1,7 @@
 const d = require("./_db");
 
+const ONLINE_TTL = 120; // detik: dianggap online kalau ada aktivitas dalam 2 menit terakhir
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") return d.send(res, 405, { error: "Method not allowed" });
   try {
@@ -13,6 +15,9 @@ module.exports = async (req, res) => {
     if (!raw) return d.send(res, 401, { error: "Akun tidak ditemukan." });
     const user = JSON.parse(raw);
     const b = d.body(req);
+
+    /* tandai player ini online */
+    await d.redis(["SET", "online:" + name, "1", "EX", ONLINE_TTL]);
 
     if (b.action === "add") {
       const slug = String(b.slug || "").slice(0, 80);
