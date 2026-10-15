@@ -34,6 +34,7 @@
 </div>
 
 <div id="adminScreen" class="adm-screen hidden">
+<div id="adminScreen" class="adm-screen hidden">
   <div class="adm-win">
     <div class="adm-head">
       <span>ADMIN PANEL</span>
@@ -47,7 +48,10 @@
         <div class="adm-title">PLAYER BAN</div>
         <div class="adm-panel">
           <label>USERNAME</label>
-          <input class="adm-in" id="admUser" placeholder="Username here.." autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="16">
+          <div class="adm-userrow">
+            <input class="adm-in" id="admUser" placeholder="Username here.." autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="16">
+            <button type="button" id="admPick" class="adm-pick" title="Pilih dari daftar player">PILIH</button>
+          </div>
           <label>REASON</label>
           <input class="adm-in" id="admReason" placeholder="Reason here.." autocomplete="off" maxlength="200">
           <label>DURATION</label>
@@ -64,6 +68,10 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h10v-2H2v2zM14.5 2.5l-3 3 1.4 1.4L6 13.8l3 3 6.9-6.9 1.4 1.4 3-3-5.8-5.8zM5 14.5L2.5 17l3 3L8 17.5 5 14.5z"/></svg>
             <span>BAN USER</span>
           </button>
+          <button type="button" id="admBanAll" class="adm-ban adm-banall">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 6.3 12.9L7.1 5.7A7.9 7.9 0 0 1 12 4zM5.7 7.1l11.2 11.2A8 8 0 0 1 5.7 7.1z"/></svg>
+            <span>BAN ALL</span>
+          </button>
           <p id="admMsg" class="adm-msg"></p>
         </div>
       </div>
@@ -73,6 +81,24 @@
           <input class="adm-in adm-search" id="admSearch" placeholder="Username..." autocomplete="off" autocapitalize="off">
           <div id="admList" class="adm-list"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup daftar semua player -->
+  <div id="admPicker" class="adm-picker hidden">
+    <div class="adm-picker-win">
+      <div class="adm-head">
+        <span>PILIH PLAYER <small id="admPickCount"></small></span>
+        <span class="adm-head-btns">
+          <button type="button" id="admPickClose" title="Tutup">X</button>
+        </span>
+      </div>
+      <input class="adm-in adm-search" id="admPickSearch" placeholder="Cari player..." autocomplete="off" autocapitalize="off">
+      <div id="admPickList" class="adm-list adm-picklist"></div>
+      <div class="adm-legend">
+        <span><i class="adm-dot on"></i> Online</span>
+        <span><i class="adm-dot off"></i> Offline</span>
       </div>
     </div>
   </div>
