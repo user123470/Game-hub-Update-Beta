@@ -596,7 +596,6 @@ if (!isPlayerPage) {
   }
 
   /* ---------- ADMIN PANEL ---------- */
-  /* ---------- ADMIN PANEL ---------- */
   function fmtLeft(until) {
     if (!until) return "Permanent";
     const ms = until - Date.now();
@@ -775,7 +774,8 @@ if (!isPlayerPage) {
     document.getElementById("admClose").onclick = closeAdmin;
     document.getElementById("admSearch").addEventListener("input", renderBans);
     document.getElementById("admReason").addEventListener("keydown", e => { if (e.key === "Enter") doBan(); });
-       }
+  }
+
   async function tryGate() {
     const input = document.getElementById("gatePw").value;
     const err = document.getElementById("gateErr");
@@ -1085,4 +1085,3 @@ setInterval(async () => {
     location.reload();
   }
 }, 40000);
-
