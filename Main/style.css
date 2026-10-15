@@ -942,7 +942,6 @@ select.adm-in { appearance: none; -webkit-appearance: none; cursor: pointer;
   .adm-panel { min-height: 0; }
 }
 
-
 /* ===== ADMIN: pilih player, ban all, status online ===== */
 .adm-userrow { display: flex; gap: 6px; }
 .adm-userrow .adm-in { flex: 1; min-width: 0; }
