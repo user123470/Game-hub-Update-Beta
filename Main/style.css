@@ -941,3 +941,64 @@ select.adm-in { appearance: none; -webkit-appearance: none; cursor: pointer;
   .adm-cols { grid-template-columns: 1fr; }
   .adm-panel { min-height: 0; }
 }
+
+
+/* ===== ADMIN: pilih player, ban all, status online ===== */
+.adm-userrow { display: flex; gap: 6px; }
+.adm-userrow .adm-in { flex: 1; min-width: 0; }
+.adm-pick {
+  flex: none;
+  padding: 0 14px;
+  font: 800 12px inherit;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #4b4b4f;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.adm-pick:hover { background: #5a5a5f; border-color: rgba(255,255,255,0.3); }
+.adm-banall { margin-top: 8px; background: #4b2a2a; border-color: #ff6b6b; }
+.adm-banall:hover { background: #7a2b2b; }
+.adm-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: rgba(0,0,0,0.6);
+}
+.adm-picker-win {
+  width: 100%;
+  max-width: 420px;
+  padding: 10px;
+  background: #3b3b3e;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+}
+.adm-picker-win .adm-head small { font-size: 12px; color: #a5a5aa; margin-left: 6px; }
+.adm-picklist { max-height: 55vh; }
+.adm-pickrow { cursor: pointer; transition: background 0.15s; }
+.adm-pickrow:hover { background: #3a3a3e; }
+.adm-dot {
+  display: inline-block;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.adm-dot.on { background: #2ecc40; box-shadow: 0 0 6px rgba(46,204,64,0.8); }
+.adm-dot.off { background: #ff4136; }
+.adm-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a5a5aa;
+}
+.adm-legend span { display: inline-flex; align-items: center; gap: 6px; }
