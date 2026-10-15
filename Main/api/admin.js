@@ -5,6 +5,75 @@ const DURATIONS = {
   "7d": 7 * 86400e3, "30d": 30 * 86400e3, "perm": 0
 };
 
+/* Ambil semua username (huruf kecil) dari database */
+async function allUserKeys() {
+  const names = new Set();
+  let cursor = "0";
+  let guard = 0;
+  do {
+    const r = await d.redis(["SCAN", cursor, "MATCH", "user:*", "COUNT", 200]);
+    cursor = String(r[0]);
+    for (const k of r[1] || []) names.add(String(k).slice(5));
+    guard++;
+  } while (cursor !== "0" && guard < 500);
+  return [...names];
+}
+
+async function mget(keys) {
+  const out = [];
+  for (let i = 0; i < keys.length; i += 100) {
+    const part = keys.slice(i, i + 100);
+    const r = await d.redis(["MGET", ...part]);
+    out.push(...(r || []));
+  }
+  return out;
+}
+
+function activeBan(raw) {
+  if (!raw) return null;
+  let b; try { b = JSON.parse(raw); } catch { return null; }
+  if (b.until && b.until < Date.now()) return null;
+  return b;
+}
+
+/* Daftar semua player + status online + status ban */
+async function listPlayers() {
+  const keys = await allUserKeys();
+  const [users, online, bans] = await Promise.all([
+    mget(keys.map(k => "user:" + k)),
+    mget(keys.map(k => "online:" + k)),
+    mget(keys.map(k => "ban:" + k))
+  ]);
+  const players = [];
+  keys.forEach((k, i) => {
+    if (!users[i]) return;
+    let u; try { u = JSON.parse(users[i]); } catch { return; }
+    players.push({
+      username: u.username || k,
+      online: !!online[i],
+      banned: !!activeBan(bans[i]),
+      created: u.created || 0
+    });
+  });
+  players.sort((a, b) => (b.online - a.online) || a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+  return players;
+}
+
+async function applyBan(real, reason, duration) {
+  const ms = DURATIONS[duration];
+  const ban = {
+    username: real,
+    reason: String(reason || "Tidak ada alasan").slice(0, 200),
+    until: ms ? Date.now() + ms : 0,
+    at: Date.now()
+  };
+  const cmd = ["SET", "ban:" + d.lower(real), JSON.stringify(ban)];
+  if (ms) cmd.push("PX", ms + 60000);
+  await d.redis(cmd);
+  await d.redis(["SADD", "banset", d.lower(real)]);
+  return ban;
+}
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") return d.send(res, 405, { error: "Method not allowed" });
   try {
@@ -38,6 +107,12 @@ module.exports = async (req, res) => {
       return d.send(res, 200, { bans });
     }
 
+    /* BARU: daftar semua player (online / offline) */
+    if (b.action === "players") {
+      const players = await listPlayers();
+      return d.send(res, 200, { players, online: players.filter(p => p.online).length });
+    }
+
     if (b.action === "ban") {
       const username = typeof b.username === "string" ? b.username.trim() : "";
       if (!d.validUsername(username)) return d.send(res, 400, { error: "Username tidak valid." });
@@ -45,18 +120,19 @@ module.exports = async (req, res) => {
       const raw = await d.redis(["GET", "user:" + d.lower(username)]);
       if (!raw) return d.send(res, 404, { error: "Username tidak ditemukan." });
       const real = JSON.parse(raw).username;
-      const ms = DURATIONS[b.duration];
-      const ban = {
-        username: real,
-        reason: String(b.reason || "Tidak ada alasan").slice(0, 200),
-        until: ms ? Date.now() + ms : 0,
-        at: Date.now()
-      };
-      const cmd = ["SET", "ban:" + d.lower(real), JSON.stringify(ban)];
-      if (ms) cmd.push("PX", ms + 60000);
-      await d.redis(cmd);
-      await d.redis(["SADD", "banset", d.lower(real)]);
+      const ban = await applyBan(real, b.reason, b.duration);
       return d.send(res, 200, { ok: true, ban });
+    }
+
+    /* BARU: ban semua player sekaligus */
+    if (b.action === "banall") {
+      if (!(b.duration in DURATIONS)) return d.send(res, 400, { error: "Durasi tidak valid." });
+      const players = await listPlayers();
+      const targets = players.filter(p => !p.banned);
+      for (let i = 0; i < targets.length; i += 10) {
+        await Promise.all(targets.slice(i, i + 10).map(p => applyBan(p.username, b.reason, b.duration)));
+      }
+      return d.send(res, 200, { ok: true, count: targets.length, skipped: players.length - targets.length });
     }
 
     if (b.action === "unban") {
