@@ -1,0 +1,987 @@
+/* =========================================================
+   KONFIGURASI
+   ========================================================= */
+const PASSWORD = "Skibidi123XD";
+const IMG_BASE = "https://radiantoptimizer.app/product/games/";
+const LS_AUTH = "gh_auth";
+const LS_HISTORY = "gh_history";
+const IDLE_MS = 1000 * 60 * 5;
+const WASM_BASE = "https://wasmarcade.com";
+const WASM_RIP = "https://wasm.rip/files";
+
+/* Host yang melarang di-embed (X-Frame-Options / frame-ancestors).
+   Kalau kamu lihat ikon muka sedih di player, tambahin domainnya di sini
+   supaya langsung muncul tombol "Buka di Tab Baru" tanpa nunggu. */
+const NO_EMBED_HOSTS = [
+  "nytimes.com",
+  "web.archive.org"
+];
+
+function canEmbed(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return !NO_EMBED_HOSTS.some(h => host === h || host.endsWith("." + h));
+  } catch { return true; }
+}
+
+const CATEGORIES = [
+  "PC", "Neo Geo", "Capcom", "Arcade",
+  "Shooter", "Action", "Retro", "Sandbox", "RPG",
+  "Strategy", "Puzzle", "Casual", "Horror",
+  "Racing", "Sports", "Adventure"
+];
+
+/* =========================================================
+   DAFTAR GAME
+   ========================================================= */
+const games = [
+  /* ==================== PC (42) ==================== */
+  { name: "Grand Theft Auto V (wasm)", slug: "gta-v-wasm", url: WASM_BASE + "/gta-5", cat: "PC" },
+  { name: "GTA: Vice City (wasm)", slug: "vice-city-wasm", url: WASM_BASE + "/vice-city", cat: "PC" },
+  { name: "GTA III", slug: "gta-3", url: WASM_BASE + "/gta3", cat: "PC" },
+  { name: "The Simpsons: Hit & Run (wasm)", slug: "simpsons-wasm", url: WASM_BASE + "/simpsons", cat: "PC" },
+  { name: "Minecraft 1.8.8", slug: "minecraft", url: WASM_BASE + "/minecraft", cat: "PC" },
+  { name: "GTA V (Archive)", slug: "gta-v", url: "https://web.archive.org/web/20261006055917/https://playgta5.com/", cat: "PC" },
+  { name: "GTA V (Alternative)", slug: "gta-v-alt", url: "https://gta.deloskiyt.pl", cat: "PC" },
+  { name: "GTA: Vice City Project", slug: "vice-city", url: "https://joncodeofficial.github.io/gta-vice-city-wasm/", cat: "PC" },
+  { name: "The Simpsons: Hit & Run (Web)", slug: "simpsons-hit-and-run", url: "https://shar-wasm.cjoseph.workers.dev/?skipmovie", cat: "PC" },
+  { name: "Cuphead", slug: "cuphead", url: WASM_RIP + "/cuphead/index.html", cat: "PC" },
+  { name: "Stardew Valley", slug: "stardew-valley", url: WASM_RIP + "/stardewvalley/index.html", cat: "PC" },
+  { name: "Among Us", slug: "among-us", url: WASM_RIP + "/amongus/index.html", cat: "PC" },
+  { name: "Lethal Company", slug: "lethal-company", url: WASM_RIP + "/lethal/index.html", cat: "PC" },
+  { name: "PEAK", slug: "peak", url: WASM_RIP + "/peak/PEAK.html", cat: "PC" },
+  { name: "RimWorld", slug: "rimworld", url: WASM_RIP + "/rimworld/index.html", cat: "PC" },
+  { name: "Inscryption", slug: "inscryption", url: WASM_RIP + "/inscryption/index.html", cat: "PC" },
+  { name: "Bendy and the Ink Machine", slug: "bendy", url: WASM_RIP + "/BATIM/index.html", cat: "PC" },
+  { name: "MiSide", slug: "miside", url: WASM_RIP + "/miside/miside.html", cat: "PC" },
+  { name: "OneShot: World Machine Edition", slug: "oneshot", url: WASM_RIP + "/oneshot-wme/index.html", cat: "PC" },
+  { name: "Helltaker", slug: "helltaker", url: WASM_RIP + "/Helltaker/helltaker.html", cat: "PC" },
+  { name: "FEZ", slug: "fez", url: WASM_RIP + "/FEZ/fez.html", cat: "PC" },
+  { name: "Brotato Paws n' Claws", slug: "brotato", url: WASM_RIP + "/bpac/index.html", cat: "PC" },
+  { name: "Ravenfield", slug: "ravenfield", url: WASM_RIP + "/ravenfield/index.html", cat: "PC" },
+  { name: "Clustertruck", slug: "clustertruck", url: WASM_RIP + "/ClusterTruck/clustertruck.html", cat: "PC" },
+  { name: "Plague Inc", slug: "plague-inc", url: WASM_RIP + "/plauge/index.html", cat: "PC" },
+  { name: "Lobotomy Corporation", slug: "lobotomy-corporation", url: WASM_RIP + "/lob-corp/index.html", cat: "PC" },
+  { name: "Trombone Champ", slug: "trombone-champ", url: WASM_RIP + "/tchamp/index.html", cat: "PC" },
+  { name: "Granny 3", slug: "granny-3", url: WASM_RIP + "/granny/granny3.html", cat: "PC" },
+  { name: "How to Fish", slug: "how-to-fish", url: WASM_RIP + "/HowToFish/HowToFish.html", cat: "PC" },
+  { name: "SCP: Containment Breach", slug: "scp-containment-breach", url: WASM_RIP + "/scp/index.html", cat: "PC" },
+  { name: "Baldi's Basics Birthday Bash", slug: "baldis-birthday-bash", url: WASM_RIP + "/birthdaybash/index.html", cat: "PC" },
+  { name: "Boil Noodles at Night", slug: "boil-noodles-at-night", url: WASM_RIP + "/boilnoodles/index.html", cat: "PC" },
+  { name: "Cheese Rolling", slug: "cheese-rolling", url: WASM_RIP + "/cheese-rolling/index.html", cat: "PC" },
+  { name: "Dice A Million", slug: "dice-a-million", url: WASM_RIP + "/diceAmillion/diceamillion.html", cat: "PC" },
+  { name: "The Man From The Window 2", slug: "man-from-the-window-2", url: WASM_RIP + "/MFDW2/index.html", cat: "PC" },
+  { name: "Beatblock", slug: "beatblock", url: WASM_RIP + "/beatblock/index.html", cat: "PC" },
+  { name: "Happy Room", slug: "happy-room", url: WASM_RIP + "/happy-room/index.html", cat: "PC" },
+  { name: "Ages of Conflict", slug: "ages-of-conflict", url: WASM_RIP + "/aoc/index.html", cat: "PC" },
+  { name: "while True: learn()", slug: "while-true-learn", url: WASM_RIP + "/wtl/index.html", cat: "PC" },
+  { name: "Crashout Crew", slug: "crashout-crew", url: WASM_RIP + "/cc/index.html", cat: "PC" },
+  { name: "The Message From Deep Space", slug: "message-from-deep-space", url: WASM_RIP + "/TMFDS/index.html", cat: "PC" },
+  { name: "Dude, Stop", slug: "dude-stop", url: WASM_RIP + "/dudestop/index.html", cat: "PC" },
+  { name: "Hill Climb Racing", slug: "hill-climb-racing", url: WASM_RIP + "/hcr/index.html", cat: "PC" },
+  { name: "Toasterball", slug: "toasterball", url: WASM_RIP + "/toasterball/index.html", cat: "PC" },
+
+  /* ==================== NEO GEO (94) ==================== */
+  { name: "2020 Super Baseball", slug: "2020-super-baseball", url: WASM_BASE + "/2020-super-baseball", cat: "Neo Geo" },
+  { name: "3 Count Bout", slug: "3-count-bout", url: WASM_BASE + "/3-count-bout", cat: "Neo Geo" },
+  { name: "Aero Fighters 2", slug: "aero-fighters-2", url: WASM_BASE + "/aero-fighters-2", cat: "Neo Geo" },
+  { name: "Aero Fighters 3", slug: "aero-fighters-3", url: WASM_BASE + "/aero-fighters-3", cat: "Neo Geo" },
+  { name: "Alpha Mission II", slug: "alpha-mission-2", url: WASM_BASE + "/alpha-mission-2", cat: "Neo Geo" },
+  { name: "Andro Dunos", slug: "andro-dunos", url: WASM_BASE + "/andro-dunos", cat: "Neo Geo" },
+  { name: "Art of Fighting 2", slug: "art-of-fighting-2", url: WASM_BASE + "/art-of-fighting-2", cat: "Neo Geo" },
+  { name: "Art of Fighting 3", slug: "art-of-fighting-3", url: WASM_BASE + "/art-of-fighting-3", cat: "Neo Geo" },
+  { name: "Bang Bead", slug: "bang-bead", url: WASM_BASE + "/bang-bead", cat: "Neo Geo" },
+  { name: "Baseball Stars 2", slug: "baseball-stars-2", url: WASM_BASE + "/baseball-stars-2", cat: "Neo Geo" },
+  { name: "Baseball Stars Professional", slug: "baseball-stars-pro", url: WASM_BASE + "/baseball-stars-professional", cat: "Neo Geo" },
+  { name: "Blazing Star", slug: "blazing-star", url: WASM_BASE + "/blazing-star", cat: "Neo Geo" },
+  { name: "Blue's Journey", slug: "blues-journey", url: WASM_BASE + "/blues-journey", cat: "Neo Geo" },
+  { name: "Breakers Revenge", slug: "breakers-revenge", url: WASM_BASE + "/breakers-revenge", cat: "Neo Geo" },
+  { name: "Burning Fight", slug: "burning-fight", url: WASM_BASE + "/burning-fight", cat: "Neo Geo" },
+  { name: "Crossed Swords", slug: "crossed-swords", url: WASM_BASE + "/crossed-swords", cat: "Neo Geo" },
+  { name: "Crossed Swords 2", slug: "crossed-swords-2", url: WASM_BASE + "/crossed-swords-2", cat: "Neo Geo" },
+  { name: "Double Dragon (Neo Geo)", slug: "double-dragon-neogeo", url: WASM_BASE + "/double-dragon-neo-geo", cat: "Neo Geo" },
+  { name: "EightMan", slug: "eightman", url: WASM_BASE + "/eightman", cat: "Neo Geo" },
+  { name: "Fatal Fury", slug: "fatal-fury", url: WASM_BASE + "/fatal-fury", cat: "Neo Geo" },
+  { name: "Fatal Fury 3", slug: "fatal-fury-3", url: WASM_BASE + "/fatal-fury-3", cat: "Neo Geo" },
+  { name: "Fatal Fury Special", slug: "fatal-fury-special", url: WASM_BASE + "/fatal-fury-special", cat: "Neo Geo" },
+  { name: "Ganryu", slug: "ganryu", url: WASM_BASE + "/ganryu", cat: "Neo Geo" },
+  { name: "Garou: Mark of the Wolves", slug: "garou-motw", url: WASM_BASE + "/garou-mark-of-the-wolves", cat: "Neo Geo" },
+  { name: "Ghost Pilots", slug: "ghost-pilots", url: WASM_BASE + "/ghost-pilots", cat: "Neo Geo" },
+  { name: "Goal! Goal! Goal!", slug: "goal-goal-goal", url: WASM_BASE + "/goal-goal-goal", cat: "Neo Geo" },
+  { name: "Kabuki Klash", slug: "kabuki-klash", url: WASM_BASE + "/kabuki-klash", cat: "Neo Geo" },
+  { name: "Karnov's Revenge", slug: "karnovs-revenge", url: WASM_BASE + "/karnovs-revenge", cat: "Neo Geo" },
+  { name: "King of the Monsters", slug: "king-of-monsters", url: WASM_BASE + "/king-of-the-monsters", cat: "Neo Geo" },
+  { name: "King of the Monsters 2", slug: "king-of-monsters-2", url: WASM_BASE + "/king-of-the-monsters-2", cat: "Neo Geo" },
+  { name: "Last Resort", slug: "last-resort", url: WASM_BASE + "/last-resort", cat: "Neo Geo" },
+  { name: "League Bowling", slug: "league-bowling", url: WASM_BASE + "/league-bowling", cat: "Neo Geo" },
+  { name: "Magical Drop II", slug: "magical-drop-2", url: WASM_BASE + "/magical-drop-2", cat: "Neo Geo" },
+  { name: "Magical Drop III", slug: "magical-drop-3", url: WASM_BASE + "/magical-drop-3", cat: "Neo Geo" },
+  { name: "Magician Lord", slug: "magician-lord", url: WASM_BASE + "/magician-lord", cat: "Neo Geo" },
+  { name: "Matrimelee", slug: "matrimelee", url: WASM_BASE + "/matrimelee", cat: "Neo Geo" },
+  { name: "Metal Slug", slug: "metal-slug", url: WASM_BASE + "/metal-slug", cat: "Neo Geo" },
+  { name: "Metal Slug 3", slug: "metal-slug-3", url: WASM_BASE + "/metal-slug-3", cat: "Neo Geo" },
+  { name: "Metal Slug 4", slug: "metal-slug-4", url: WASM_BASE + "/metal-slug-4", cat: "Neo Geo" },
+  { name: "Metal Slug 5", slug: "metal-slug-5", url: WASM_BASE + "/metal-slug-5", cat: "Neo Geo" },
+  { name: "Metal Slug X", slug: "metal-slug-x", url: WASM_BASE + "/metal-slug-x", cat: "Neo Geo" },
+  { name: "Mutation Nation", slug: "mutation-nation", url: WASM_BASE + "/mutation-nation", cat: "Neo Geo" },
+  { name: "NAM-1975", slug: "nam-1975", url: WASM_BASE + "/nam-1975", cat: "Neo Geo" },
+  { name: "Neo Bomberman", slug: "neo-bomberman", url: WASM_BASE + "/neo-bomberman", cat: "Neo Geo" },
+  { name: "Neo Drift Out", slug: "neo-drift-out", url: WASM_BASE + "/neo-drift-out", cat: "Neo Geo" },
+  { name: "Neo Mr. Do!", slug: "neo-mr-do", url: WASM_BASE + "/neo-mr-do", cat: "Neo Geo" },
+  { name: "Neo Turf Masters", slug: "neo-turf-masters", url: WASM_BASE + "/neo-turf-masters", cat: "Neo Geo" },
+  { name: "Nightmare in the Dark", slug: "nightmare-in-the-dark", url: WASM_BASE + "/nightmare-in-the-dark", cat: "Neo Geo" },
+  { name: "Ninja Combat", slug: "ninja-combat", url: WASM_BASE + "/ninja-combat", cat: "Neo Geo" },
+  { name: "Ninja Commando", slug: "ninja-commando", url: WASM_BASE + "/ninja-commando", cat: "Neo Geo" },
+  { name: "Over Top", slug: "over-top", url: WASM_BASE + "/over-top", cat: "Neo Geo" },
+  { name: "Panic Bomber", slug: "panic-bomber", url: WASM_BASE + "/panic-bomber", cat: "Neo Geo" },
+  { name: "Prehistoric Isle 2", slug: "prehistoric-isle-2", url: WASM_BASE + "/prehistoric-isle-2", cat: "Neo Geo" },
+  { name: "Pulstar", slug: "pulstar", url: WASM_BASE + "/pulstar", cat: "Neo Geo" },
+  { name: "Puzzle Bobble", slug: "puzzle-bobble", url: WASM_BASE + "/puzzle-bobble", cat: "Neo Geo" },
+  { name: "Puzzle Bobble 2", slug: "puzzle-bobble-2", url: WASM_BASE + "/puzzle-bobble-2", cat: "Neo Geo" },
+  { name: "Rage of the Dragons", slug: "rage-of-the-dragons", url: WASM_BASE + "/rage-of-the-dragons", cat: "Neo Geo" },
+  { name: "Real Bout Fatal Fury", slug: "real-bout-fatal-fury", url: WASM_BASE + "/real-bout-fatal-fury", cat: "Neo Geo" },
+  { name: "Real Bout Fatal Fury 2", slug: "real-bout-fatal-fury-2", url: WASM_BASE + "/real-bout-fatal-fury-2", cat: "Neo Geo" },
+  { name: "Real Bout Fatal Fury Special", slug: "real-bout-fatal-fury-special", url: WASM_BASE + "/real-bout-fatal-fury-special", cat: "Neo Geo" },
+  { name: "Robo Army", slug: "robo-army", url: WASM_BASE + "/robo-army", cat: "Neo Geo" },
+  { name: "Samurai Shodown III", slug: "samurai-shodown-3", url: WASM_BASE + "/samurai-shodown-3", cat: "Neo Geo" },
+  { name: "Samurai Shodown IV", slug: "samurai-shodown-4", url: WASM_BASE + "/samurai-shodown-4", cat: "Neo Geo" },
+  { name: "Samurai Shodown V Special", slug: "samurai-shodown-5", url: WASM_BASE + "/samurai-shodown-v-special", cat: "Neo Geo" },
+  { name: "Sengoku", slug: "sengoku", url: WASM_BASE + "/sengoku", cat: "Neo Geo" },
+  { name: "Sengoku 2", slug: "sengoku-2", url: WASM_BASE + "/sengoku-2", cat: "Neo Geo" },
+  { name: "Sengoku 3", slug: "sengoku-3", url: WASM_BASE + "/sengoku-3", cat: "Neo Geo" },
+  { name: "Shock Troopers", slug: "shock-troopers", url: WASM_BASE + "/shock-troopers", cat: "Neo Geo" },
+  { name: "Shock Troopers 2nd Squad", slug: "shock-troopers-2", url: WASM_BASE + "/shock-troopers-2nd-squad", cat: "Neo Geo" },
+  { name: "SNK vs. Capcom: SVC Chaos", slug: "svc-chaos", url: WASM_BASE + "/snk-vs-capcom-svc-chaos", cat: "Neo Geo" },
+  { name: "Soccer Brawl", slug: "soccer-brawl", url: WASM_BASE + "/soccer-brawl", cat: "Neo Geo" },
+  { name: "Spinmaster", slug: "spinmaster", url: WASM_BASE + "/spinmaster", cat: "Neo Geo" },
+  { name: "Street Hoop", slug: "street-hoop", url: WASM_BASE + "/street-hoop", cat: "Neo Geo" },
+  { name: "Super Dodge Ball", slug: "super-dodge-ball", url: WASM_BASE + "/super-dodge-ball", cat: "Neo Geo" },
+  { name: "The Irritating Maze", slug: "irritating-maze", url: WASM_BASE + "/the-irritating-maze", cat: "Neo Geo" },
+  { name: "The King of Fighters '94", slug: "kof-94", url: WASM_BASE + "/the-king-of-fighters-94", cat: "Neo Geo" },
+  { name: "The King of Fighters '95", slug: "kof-95", url: WASM_BASE + "/the-king-of-fighters-95", cat: "Neo Geo" },
+  { name: "The King of Fighters '96", slug: "kof-96", url: WASM_BASE + "/the-king-of-fighters-96", cat: "Neo Geo" },
+  { name: "The King of Fighters '97", slug: "kof-97", url: WASM_BASE + "/the-king-of-fighters-97", cat: "Neo Geo" },
+  { name: "The King of Fighters 2000", slug: "kof-2000", url: WASM_BASE + "/the-king-of-fighters-2000", cat: "Neo Geo" },
+  { name: "The King of Fighters 2001", slug: "kof-2001", url: WASM_BASE + "/the-king-of-fighters-2001", cat: "Neo Geo" },
+  { name: "The King of Fighters 2002", slug: "kof-2002", url: WASM_BASE + "/the-king-of-fighters-2002", cat: "Neo Geo" },
+  { name: "The King of Fighters 2003", slug: "kof-2003", url: WASM_BASE + "/the-king-of-fighters-2003", cat: "Neo Geo" },
+  { name: "The Last Blade", slug: "last-blade", url: WASM_BASE + "/the-last-blade", cat: "Neo Geo" },
+  { name: "The Last Blade 2", slug: "last-blade-2", url: WASM_BASE + "/the-last-blade-2", cat: "Neo Geo" },
+  { name: "The Super Spy", slug: "super-spy", url: WASM_BASE + "/the-super-spy", cat: "Neo Geo" },
+  { name: "The Ultimate 11", slug: "ultimate-11", url: WASM_BASE + "/the-ultimate-11", cat: "Neo Geo" },
+  { name: "Thrash Rally", slug: "thrash-rally", url: WASM_BASE + "/thrash-rally", cat: "Neo Geo" },
+  { name: "Top Hunter", slug: "top-hunter", url: WASM_BASE + "/top-hunter", cat: "Neo Geo" },
+  { name: "Twinkle Star Sprites", slug: "twinkle-star-sprites", url: WASM_BASE + "/twinkle-star-sprites", cat: "Neo Geo" },
+  { name: "Waku Waku 7", slug: "waku-waku-7", url: WASM_BASE + "/waku-waku-7", cat: "Neo Geo" },
+  { name: "Windjammers", slug: "windjammers", url: WASM_BASE + "/windjammers", cat: "Neo Geo" },
+  { name: "Zed Blade", slug: "zed-blade", url: WASM_BASE + "/zed-blade", cat: "Neo Geo" },
+  { name: "Zupapa!", slug: "zupapa", url: WASM_BASE + "/zupapa", cat: "Neo Geo" },
+
+  /* ==================== CAPCOM (62) ==================== */
+  { name: "1941: Counter Attack", slug: "1941", url: WASM_BASE + "/1941-counter-attack", cat: "Capcom" },
+  { name: "1944: The Loop Master", slug: "1944", url: WASM_BASE + "/1944-the-loop-master", cat: "Capcom" },
+  { name: "19XX: The War Against Destiny", slug: "19xx", url: WASM_BASE + "/19xx-the-war-against-destiny", cat: "Capcom" },
+  { name: "Alien vs. Predator", slug: "avp-capcom", url: WASM_BASE + "/alien-vs-predator", cat: "Capcom" },
+  { name: "Armored Warriors", slug: "armored-warriors", url: WASM_BASE + "/armored-warriors", cat: "Capcom" },
+  { name: "Battle Circuit", slug: "battle-circuit", url: WASM_BASE + "/battle-circuit", cat: "Capcom" },
+  { name: "Cadillacs and Dinosaurs", slug: "cadillacs-dinosaurs", url: WASM_BASE + "/cadillacs-and-dinosaurs", cat: "Capcom" },
+  { name: "Capcom Sports Club", slug: "capcom-sports-club", url: WASM_BASE + "/capcom-sports-club", cat: "Capcom" },
+  { name: "Captain Commando", slug: "captain-commando", url: WASM_BASE + "/captain-commando", cat: "Capcom" },
+  { name: "Carrier Air Wing", slug: "carrier-air-wing", url: WASM_BASE + "/carrier-air-wing", cat: "Capcom" },
+  { name: "Cyberbots", slug: "cyberbots", url: WASM_BASE + "/cyberbots", cat: "Capcom" },
+  { name: "Darkstalkers", slug: "darkstalkers", url: WASM_BASE + "/darkstalkers", cat: "Capcom" },
+  { name: "Dimahoo", slug: "dimahoo", url: WASM_BASE + "/dimahoo", cat: "Capcom" },
+  { name: "D&D: Shadow Over Mystara", slug: "dd-shadow-mystara", url: WASM_BASE + "/dungeons-dragons-shadow-over-mystara", cat: "Capcom" },
+  { name: "D&D: Tower of Doom", slug: "dd-tower-doom", url: WASM_BASE + "/dungeons-dragons-tower-of-doom", cat: "Capcom" },
+  { name: "Dynasty Wars", slug: "dynasty-wars", url: WASM_BASE + "/dynasty-wars", cat: "Capcom" },
+  { name: "Eco Fighters", slug: "eco-fighters", url: WASM_BASE + "/eco-fighters", cat: "Capcom" },
+  { name: "Final Fight", slug: "final-fight", url: WASM_BASE + "/final-fight", cat: "Capcom" },
+  { name: "Forgotten Worlds", slug: "forgotten-worlds", url: WASM_BASE + "/forgotten-worlds", cat: "Capcom" },
+  { name: "Giga Wing", slug: "giga-wing", url: WASM_BASE + "/giga-wing", cat: "Capcom" },
+  { name: "Hyper Street Fighter II", slug: "hyper-sf2", url: WASM_BASE + "/hyper-street-fighter-2", cat: "Capcom" },
+  { name: "JoJo's Bizarre Adventure", slug: "jojo", url: WASM_BASE + "/jojos-bizarre-adventure", cat: "Capcom" },
+  { name: "JoJo's Venture", slug: "jojo-venture", url: WASM_BASE + "/jojos-venture", cat: "Capcom" },
+  { name: "Knights of the Round", slug: "knights-of-the-round", url: WASM_BASE + "/knights-of-the-round", cat: "Capcom" },
+  { name: "Magic Sword", slug: "magic-sword", url: WASM_BASE + "/magic-sword", cat: "Capcom" },
+  { name: "Mars Matrix", slug: "mars-matrix", url: WASM_BASE + "/mars-matrix", cat: "Capcom" },
+  { name: "Marvel Super Heroes", slug: "marvel-super-heroes", url: WASM_BASE + "/marvel-super-heroes", cat: "Capcom" },
+  { name: "Marvel Super Heroes vs. Street Fighter", slug: "marvel-vs-sf", url: WASM_BASE + "/marvel-super-heroes-vs-street-fighter", cat: "Capcom" },
+  { name: "Marvel vs. Capcom", slug: "marvel-vs-capcom", url: WASM_BASE + "/marvel-vs-capcom", cat: "Capcom" },
+  { name: "Mega Man 2: The Power Fighters", slug: "mega-man-2-power-fighters", url: WASM_BASE + "/mega-man-2-the-power-fighters", cat: "Capcom" },
+  { name: "Mega Man: The Power Battle", slug: "mega-man-power-battle", url: WASM_BASE + "/mega-man-the-power-battle", cat: "Capcom" },
+  { name: "Mega Twins", slug: "mega-twins", url: WASM_BASE + "/mega-twins", cat: "Capcom" },
+  { name: "Mighty! Pang", slug: "mighty-pang", url: WASM_BASE + "/mighty-pang", cat: "Capcom" },
+  { name: "Muscle Bomber Duo", slug: "muscle-bomber-duo", url: WASM_BASE + "/muscle-bomber-duo", cat: "Capcom" },
+  { name: "Night Warriors", slug: "night-warriors", url: WASM_BASE + "/night-warriors-darkstalkers-revenge", cat: "Capcom" },
+  { name: "Pang! 3", slug: "pang-3", url: WASM_BASE + "/pang-3", cat: "Capcom" },
+  { name: "Pnickies", slug: "pnickies", url: WASM_BASE + "/pnickies", cat: "Capcom" },
+  { name: "Progear", slug: "progear", url: WASM_BASE + "/progear", cat: "Capcom" },
+  { name: "Puzz Loop 2", slug: "puzz-loop-2", url: WASM_BASE + "/puzz-loop-2", cat: "Capcom" },
+  { name: "Red Earth", slug: "red-earth", url: WASM_BASE + "/red-earth", cat: "Capcom" },
+  { name: "Ring of Destruction", slug: "ring-of-destruction", url: WASM_BASE + "/ring-of-destruction", cat: "Capcom" },
+  { name: "Saturday Night Slam Masters", slug: "slam-masters", url: WASM_BASE + "/saturday-night-slam-masters", cat: "Capcom" },
+  { name: "Street Fighter Alpha", slug: "sf-alpha", url: WASM_BASE + "/street-fighter-alpha", cat: "Capcom" },
+  { name: "Street Fighter Alpha 2", slug: "sf-alpha-2", url: WASM_BASE + "/street-fighter-alpha-2", cat: "Capcom" },
+  { name: "Street Fighter Alpha 3", slug: "sf-alpha-3", url: WASM_BASE + "/street-fighter-alpha-3", cat: "Capcom" },
+  { name: "Street Fighter II: Champion Edition", slug: "sf2-champion", url: WASM_BASE + "/street-fighter-2-champion-edition", cat: "Capcom" },
+  { name: "Street Fighter II: Hyper Fighting", slug: "sf2-hyper", url: WASM_BASE + "/street-fighter-2-hyper-fighting", cat: "Capcom" },
+  { name: "Street Fighter II: The World Warrior", slug: "sf2-world-warrior", url: WASM_BASE + "/street-fighter-2-the-world-warrior", cat: "Capcom" },
+  { name: "Street Fighter III: 2nd Impact", slug: "sf3-2nd-impact", url: WASM_BASE + "/street-fighter-3-2nd-impact", cat: "Capcom" },
+  { name: "Street Fighter III: 3rd Strike", slug: "sf3-3rd-strike", url: WASM_BASE + "/street-fighter-3-3rd-strike", cat: "Capcom" },
+  { name: "Street Fighter III: New Generation", slug: "sf3-new-gen", url: WASM_BASE + "/street-fighter-3-new-generation", cat: "Capcom" },
+  { name: "Street Fighter Zero 2 Alpha", slug: "sf-zero-2-alpha", url: WASM_BASE + "/street-fighter-zero-2-alpha", cat: "Capcom" },
+  { name: "Super Gem Fighter Mini Mix", slug: "super-gem-fighter", url: WASM_BASE + "/super-gem-fighter-mini-mix", cat: "Capcom" },
+  { name: "Super Puzzle Fighter II Turbo", slug: "super-puzzle-fighter", url: WASM_BASE + "/super-puzzle-fighter-2-turbo", cat: "Capcom" },
+  { name: "Super Street Fighter II Turbo", slug: "super-sf2-turbo", url: WASM_BASE + "/super-street-fighter-2-turbo", cat: "Capcom" },
+  { name: "Super Street Fighter II: New Challengers", slug: "super-sf2-new-challengers", url: WASM_BASE + "/super-street-fighter-2-new-challengers", cat: "Capcom" },
+  { name: "The King of Dragons", slug: "king-of-dragons", url: WASM_BASE + "/the-king-of-dragons", cat: "Capcom" },
+  { name: "Three Wonders", slug: "three-wonders", url: WASM_BASE + "/three-wonders", cat: "Capcom" },
+  { name: "U.N. Squadron", slug: "un-squadron", url: WASM_BASE + "/un-squadron", cat: "Capcom" },
+  { name: "Vampire Hunter 2", slug: "vampire-hunter-2", url: WASM_BASE + "/vampire-hunter-2", cat: "Capcom" },
+  { name: "Vampire Savior", slug: "vampire-savior", url: WASM_BASE + "/vampire-savior", cat: "Capcom" },
+  { name: "Vampire Savior 2", slug: "vampire-savior-2", url: WASM_BASE + "/vampire-savior-2", cat: "Capcom" },
+  { name: "Varth", slug: "varth", url: WASM_BASE + "/varth", cat: "Capcom" },
+  { name: "Warriors of Fate", slug: "warriors-of-fate", url: WASM_BASE + "/warriors-of-fate", cat: "Capcom" },
+  { name: "Willow", slug: "willow", url: WASM_BASE + "/willow", cat: "Capcom" },
+  { name: "X-Men vs Street Fighter", slug: "xmen-vs-sf", url: WASM_BASE + "/x-men-vs-street-fighter", cat: "Capcom" },
+  { name: "X-Men: Children Of The Atom", slug: "xmen-cota", url: WASM_BASE + "/x-men-children-of-the-atom", cat: "Capcom" },
+
+  /* ==================== ARCADE (70) ==================== */
+  { name: "After Burner II", slug: "after-burner-2", url: WASM_BASE + "/after-burner-2", cat: "Arcade" },
+  { name: "Alien Storm", slug: "alien-storm", url: WASM_BASE + "/alien-storm", cat: "Arcade" },
+  { name: "Altered Beast", slug: "altered-beast", url: WASM_BASE + "/altered-beast", cat: "Arcade" },
+  { name: "Art of Fighting", slug: "art-of-fighting", url: WASM_BASE + "/art-of-fighting", cat: "Arcade" },
+  { name: "Batman", slug: "batman-arcade", url: WASM_BASE + "/batman", cat: "Arcade" },
+  { name: "Battletoads", slug: "battletoads", url: WASM_BASE + "/battletoads", cat: "Arcade" },
+  { name: "Bishoujo Senshi Sailor Moon", slug: "sailor-moon", url: WASM_BASE + "/bishoujo-senshi-sailor-moon", cat: "Arcade" },
+  { name: "Buck Rogers", slug: "buck-rogers", url: WASM_BASE + "/buck-rogers", cat: "Arcade" },
+  { name: "Captain America and the Avengers", slug: "captain-america", url: WASM_BASE + "/captain-america-and-the-avengers", cat: "Arcade" },
+  { name: "Columns", slug: "columns", url: WASM_BASE + "/columns", cat: "Arcade" },
+  { name: "Congo Bongo", slug: "congo-bongo", url: WASM_BASE + "/congo-bongo", cat: "Arcade" },
+  { name: "Contra", slug: "contra", url: WASM_BASE + "/contra", cat: "Arcade" },
+  { name: "Cyber Police ESWAT", slug: "eswat", url: WASM_BASE + "/cyber-police-eswat", cat: "Arcade" },
+  { name: "Double Dragon", slug: "double-dragon", url: WASM_BASE + "/double-dragon", cat: "Arcade" },
+  { name: "Double Dragon 3", slug: "double-dragon-3", url: WASM_BASE + "/double-dragon-3", cat: "Arcade" },
+  { name: "Double Dragon II", slug: "double-dragon-2", url: WASM_BASE + "/double-dragon-2", cat: "Arcade" },
+  { name: "Dragon Ball Z", slug: "dragon-ball-z", url: WASM_BASE + "/dragon-ball-z", cat: "Arcade" },
+  { name: "Fire Shark", slug: "fire-shark", url: WASM_BASE + "/fire-shark", cat: "Arcade" },
+  { name: "Flicky", slug: "flicky", url: WASM_BASE + "/flicky", cat: "Arcade" },
+  { name: "Frogger", slug: "frogger", url: WASM_BASE + "/frogger", cat: "Arcade" },
+  { name: "Gain Ground", slug: "gain-ground", url: WASM_BASE + "/gain-ground", cat: "Arcade" },
+  { name: "Ghouls'n Ghosts", slug: "ghouls-n-ghosts", url: WASM_BASE + "/ghouls-n-ghosts", cat: "Arcade" },
+  { name: "Golden Axe", slug: "golden-axe", url: WASM_BASE + "/golden-axe", cat: "Arcade" },
+  { name: "Growl", slug: "growl", url: WASM_BASE + "/growl", cat: "Arcade" },
+  { name: "Hellfire", slug: "hellfire", url: WASM_BASE + "/hellfire", cat: "Arcade" },
+  { name: "Hit the Ice", slug: "hit-the-ice", url: WASM_BASE + "/hit-the-ice", cat: "Arcade" },
+  { name: "Hook", slug: "hook", url: WASM_BASE + "/hook", cat: "Arcade" },
+  { name: "King & Balloon", slug: "king-balloon", url: WASM_BASE + "/king-and-balloon", cat: "Arcade" },
+  { name: "Klax", slug: "klax", url: WASM_BASE + "/klax", cat: "Arcade" },
+  { name: "Michael Jackson's Moonwalker", slug: "moonwalker", url: WASM_BASE + "/michael-jacksons-moonwalker", cat: "Arcade" },
+  { name: "Mortal Kombat", slug: "mortal-kombat", url: WASM_BASE + "/mortal-kombat", cat: "Arcade" },
+  { name: "Mortal Kombat II", slug: "mortal-kombat-2", url: WASM_BASE + "/mortal-kombat-2", cat: "Arcade" },
+  { name: "Ms. Pac-Man", slug: "ms-pac-man", url: WASM_BASE + "/ms-pac-man", cat: "Arcade" },
+  { name: "NBA Jam Tournament Edition", slug: "nba-jam", url: WASM_BASE + "/nba-jam-tournament-edition", cat: "Arcade" },
+  { name: "Nemo", slug: "nemo", url: WASM_BASE + "/nemo", cat: "Arcade" },
+  { name: "OutRun", slug: "outrun", url: WASM_BASE + "/outrun", cat: "Arcade" },
+  { name: "Pac-Man", slug: "pac-man", url: WASM_BASE + "/pac-man", cat: "Arcade" },
+  { name: "Pit-Fighter", slug: "pit-fighter", url: WASM_BASE + "/pit-fighter", cat: "Arcade" },
+  { name: "Puyo Puyo 2", slug: "puyo-puyo-2", url: WASM_BASE + "/puyo-puyo-2", cat: "Arcade" },
+  { name: "Rainbow Islands", slug: "rainbow-islands", url: WASM_BASE + "/rainbow-islands", cat: "Arcade" },
+  { name: "Rambo III", slug: "rambo-3", url: WASM_BASE + "/rambo-3", cat: "Arcade" },
+  { name: "Rolling Thunder 2", slug: "rolling-thunder-2", url: WASM_BASE + "/rolling-thunder-2", cat: "Arcade" },
+  { name: "Samurai Shodown", slug: "samurai-shodown", url: WASM_BASE + "/samurai-shodown", cat: "Arcade" },
+  { name: "Samurai Shodown II", slug: "samurai-shodown-2", url: WASM_BASE + "/samurai-shodown-2", cat: "Arcade" },
+  { name: "SegaSonic the Hedgehog", slug: "sega-sonic", url: WASM_BASE + "/sega-sonic-the-hedgehog", cat: "Arcade" },
+  { name: "Shadow Dancer", slug: "shadow-dancer", url: WASM_BASE + "/shadow-dancer", cat: "Arcade" },
+  { name: "Snow Bros.: Nick & Tom", slug: "snow-bros", url: WASM_BASE + "/snow-bros", cat: "Arcade" },
+  { name: "Space Harrier", slug: "space-harrier", url: WASM_BASE + "/space-harrier", cat: "Arcade" },
+  { name: "Star Wars", slug: "star-wars", url: WASM_BASE + "/star-wars", cat: "Arcade" },
+  { name: "Strider", slug: "strider", url: WASM_BASE + "/strider", cat: "Arcade" },
+  { name: "Super Hang-On", slug: "super-hang-on", url: WASM_BASE + "/super-hang-on", cat: "Arcade" },
+  { name: "Superman", slug: "superman", url: WASM_BASE + "/superman", cat: "Arcade" },
+  { name: "The King of Fighters '98", slug: "kof-98", url: WASM_BASE + "/the-king-of-fighters-98", cat: "Arcade" },
+  { name: "The King of Fighters '99", slug: "kof-99", url: WASM_BASE + "/the-king-of-fighters-99", cat: "Arcade" },
+  { name: "The New Zealand Story", slug: "new-zealand-story", url: WASM_BASE + "/the-new-zealand-story", cat: "Arcade" },
+  { name: "The Punisher", slug: "punisher", url: WASM_BASE + "/the-punisher", cat: "Arcade" },
+  { name: "Toki", slug: "toki", url: WASM_BASE + "/toki", cat: "Arcade" },
+  { name: "Truxton", slug: "truxton", url: WASM_BASE + "/truxton", cat: "Arcade" },
+  { name: "Twin Cobra", slug: "twin-cobra", url: WASM_BASE + "/twin-cobra", cat: "Arcade" },
+  { name: "Twin Hawk", slug: "twin-hawk", url: WASM_BASE + "/twin-hawk", cat: "Arcade" },
+  { name: "Two Crude Dudes", slug: "two-crude-dudes", url: WASM_BASE + "/two-crude-dudes", cat: "Arcade" },
+  { name: "Ultimate Mortal Kombat 3", slug: "umk3", url: WASM_BASE + "/ultimate-mortal-kombat-3", cat: "Arcade" },
+  { name: "Viewpoint", slug: "viewpoint", url: WASM_BASE + "/viewpoint", cat: "Arcade" },
+  { name: "Volfied", slug: "volfied", url: WASM_BASE + "/volfied", cat: "Arcade" },
+  { name: "Zero Wing", slug: "zero-wing", url: WASM_BASE + "/zero-wing", cat: "Arcade" },
+  { name: "2020 Super Baseball (Arcade)", slug: "2020-super-baseball-arcade", url: WASM_BASE + "/2020-super-baseball", cat: "Arcade" },
+
+  /* ==================== SHOOTER (23) ==================== */
+  { name: "Quake", slug: "quake", url: "https://q1.pieter.com/", cat: "Shooter" },
+  { name: "CS Surf", slug: "cs-surf", url: "https://surfd.net/", cat: "Shooter" },
+  { name: "Black Ops Zombies", slug: "bo1-zombies", url: "https://vel.gg/bo1z", cat: "Shooter" },
+  { name: "Halo: Combat Evolved", slug: "halo-ce", url: "https://mitchellhynes.com/halo", cat: "Shooter" },
+  { name: "Moon Zombies", slug: "moon-zombies", url: "https://radiantoptimizer.app/en/games/moon-zombies", cat: "Shooter" },
+  { name: "Kino der Toten", slug: "kino-der-toten", url: "https://theeagler1234-alt.github.io/kino-der-toten/", cat: "Shooter" },
+  { name: "Claude of Duty: Vibe Slops II", slug: "black-ops-2", url: "https://playops.netlify.app/", cat: "Shooter" },
+  { name: "Halo CE Mobile", slug: "halo-mobile", url: "https://hcemobile.com/", cat: "Shooter" },
+  { name: "Quake II", slug: "quake-2", url: "https://q2.pieter.com/", cat: "Shooter" },
+  { name: "Quake III", slug: "quake-3", url: "https://q3.pieter.com/", cat: "Shooter" },
+  { name: "Return to Castle Wolfenstein", slug: "wolfenstein", url: "https://rtcw.pieter.com/", cat: "Shooter" },
+  { name: "Urban Terror", slug: "urban-terror", url: "https://ut.pieter.com/", cat: "Shooter" },
+  { name: "Half-Life Web", slug: "half-life", url: "https://pixelsuft.github.io/hl/", cat: "Shooter" },
+  { name: "Half-Life / CS 1.6", slug: "webxash", url: "https://x8bitrain.github.io/webXash/", cat: "Shooter" },
+  { name: "Krunker.io", slug: "krunker", url: "https://krunker.io/", cat: "Shooter" },
+  { name: "DEADSHOT.io", slug: "deadshot", url: "https://deadshot.io/", cat: "Shooter" },
+  { name: "Counter-Strike 1.6", slug: "counter-strike", url: "https://combatskirmish.net/quickjoin", cat: "Shooter" },
+  { name: "Nacht der Untoten", slug: "nacht-der-untoten", url: "https://zombies.bitcoinsapi.com/", cat: "Shooter" },
+  { name: "Fortnite OG", slug: "fortnite-og", url: "https://fortniteog.lol/", cat: "Shooter" },
+  { name: "DOOM II Multiplayer", slug: "doom-2-multiplayer", url: "https://doom.pieter.com/", cat: "Shooter" },
+  { name: "Modern Warfare 2", slug: "modern-warfare-2", url: "https://ovz-game-production.up.railway.app/", cat: "Shooter" },
+  { name: "Redcoats.io", slug: "redcoats", url: "https://redcoats.io/app/", cat: "Shooter" },
+  { name: "Salty Seas", slug: "salty-seas", url: "https://saltyseas.io/app/", cat: "Shooter" },
+
+  /* ==================== ACTION (7) ==================== */
+  { name: "PokéSurvivor", slug: "pokesurvivor", url: "https://pokesurvivor.com/", cat: "Action" },
+  { name: "Web Dashers", slug: "web-dashers", url: "https://web-dashers.github.io/", cat: "Action" },
+  { name: "Lagos Life", slug: "lagos-life", url: "https://lagoslife.com.ng/play/", cat: "Action" },
+  { name: "Super Mario Zombies", slug: "super-mario-zombies", url: "https://smz.fun/", cat: "Action" },
+  { name: "Crash Bash Online", slug: "crash-bash", url: "https://crashbash.app/", cat: "Action" },
+  { name: "The Binding of Isaac: Repentance+", slug: "binding-of-isaac", url: "https://tboi.online/", cat: "Action" },
+  { name: "SandStorm", slug: "sandstorm", url: "https://sandstorm.ink/play.html", cat: "Action" },
+
+  /* ==================== RPG (7) ==================== */
+  { name: "Diablo", slug: "diablo", url: "https://johnimril.github.io/diablo_web/", cat: "RPG" },
+  { name: "TuffyMon", slug: "tuffymon", url: "https://tuffymon.app/", cat: "RPG" },
+  { name: "DELTARUNE Fight Simulator", slug: "deltarune-fight-simulator", url: "https://deltarunesim.com/", cat: "RPG" },
+  { name: "AI Dungeon", slug: "ai-dungeon", url: "https://play.aidungeon.com/", cat: "RPG" },
+  { name: "Pokémon Redstone", slug: "pokemon-redstone", url: "https://pokemon-redstone.pages.dev/", cat: "RPG" },
+  { name: "RuneScape Classic", slug: "runescape-classic", url: "https://runescapeclassic.gold/", cat: "RPG" },
+  { name: "A Dark Room", slug: "a-dark-room", url: "https://adarkroom.doublespeakgames.com/", cat: "RPG" },
+
+  /* ==================== STRATEGY (6) ==================== */
+  { name: "OpenFront.io", slug: "openfront", url: "https://openfront.io/", cat: "Strategy" },
+  { name: "OpenTTD", slug: "openttd", url: "https://dos.zone/open-ttd/", cat: "Strategy" },
+  { name: "Dune II: Open Dune", slug: "dune-2", url: "https://dos.zone/dune-ii-the-building-of-a-dynasty-dec-1992/", cat: "Strategy" },
+  { name: "Command & Conquer", slug: "command-and-conquer", url: "https://dos.zone/command-conquer-sep-26-1995/", cat: "Strategy" },
+  { name: "Heroes of Might and Magic II", slug: "heroes-2", url: "https://dos.zone/heroes-of-might-and-magic-ii/", cat: "Strategy" },
+  { name: "SimCity 2000", slug: "simcity-2000", url: "https://dos.zone/sim-city-2000-1993/", cat: "Strategy" },
+
+  /* ==================== PUZZLE (17) ==================== */
+  { name: "Chainle", slug: "chainle", url: "https://chainle.io/", cat: "Puzzle" },
+  { name: "Checkers: Cardgames.io", slug: "checkers-cardgames", url: "https://cardgames.io/checkers/", cat: "Puzzle" },
+  { name: "Hearts: Cardgames.io", slug: "hearts-cardgames", url: "https://cardgames.io/hearts/", cat: "Puzzle" },
+  { name: "Jigsaw Planet", slug: "jigsaw-planet", url: "https://www.jigsawplanet.com/", cat: "Puzzle" },
+  { name: "Songless", slug: "songless", url: "https://lessgames.com/songless", cat: "Puzzle" },
+  { name: "RNGdle", slug: "rngdle", url: "https://www.rngdle.com/", cat: "Puzzle" },
+  { name: "Connections: NYT", slug: "connections", url: "https://www.nytimes.com/games/connections", cat: "Puzzle" },
+  { name: "MapTap.gg", slug: "maptap", url: "https://maptap.gg/home", cat: "Puzzle" },
+  { name: "enclose.horse", slug: "enclose-horse", url: "https://enclose.horse/", cat: "Puzzle" },
+  { name: "Magnitudle", slug: "magnitudle", url: "https://magnitudle.com/", cat: "Puzzle" },
+  { name: "Costcodle", slug: "costcodle", url: "https://costcodle.com/", cat: "Puzzle" },
+  { name: "Six Cats Under", slug: "six-cats-under", url: "https://teambeanloop.itch.io/six-cats-under", cat: "Puzzle" },
+  { name: "2048", slug: "2048", url: "https://play2048.co/", cat: "Puzzle" },
+  { name: "Little Alchemy 2", slug: "little-alchemy-2", url: "https://littlealchemy2.com/", cat: "Puzzle" },
+  { name: "Unusual Suspects", slug: "unusual-suspects", url: "https://neal.fun/unusual-suspects/", cat: "Puzzle" },
+  { name: "The Password Game", slug: "password-game", url: "https://neal.fun/password-game/", cat: "Puzzle" },
+  { name: "I'm Not a Robot", slug: "not-a-robot", url: "https://neal.fun/not-a-robot/", cat: "Puzzle" },
+
+  /* ==================== CASUAL (21) ==================== */
+  { name: "Cheese Cube", slug: "cheese-cube", url: "https://radiantoptimizer.app/en/games/cheese-cube", cat: "Casual" },
+  { name: "Songspot", slug: "songspot", url: "https://songspot.net/", cat: "Casual" },
+  { name: "Fermi", slug: "fermi", url: "https://fermi.gg/", cat: "Casual" },
+  { name: "Swervle", slug: "swervle", url: "https://swervle.com/", cat: "Casual" },
+  { name: "All 22 Pokémon", slug: "all-22-pokemon", url: "https://all22pokemon.com/", cat: "Casual" },
+  { name: "Krillion", slug: "krillion", url: "https://krillion.io/", cat: "Casual" },
+  { name: "Poople", slug: "poople", url: "https://poople.io/", cat: "Casual" },
+  { name: "Dragonkind", slug: "dragonkind", url: "https://dragonkind.com/", cat: "Casual" },
+  { name: "NoomiClone: Browser Prototype", slug: "noomiclone", url: "https://jamesnorth.itch.io/noomiclone", cat: "Casual" },
+  { name: "TypeRacer", slug: "typeracer", url: "https://play.typeracer.com/", cat: "Casual" },
+  { name: "ZType", slug: "ztype", url: "https://zty.pe/", cat: "Casual" },
+  { name: "Toss Office", slug: "toss-office", url: "https://ravenous-den.itch.io/toss-office", cat: "Casual" },
+  { name: "Sort the Court!", slug: "sort-the-court", url: "https://graebor.itch.io/sort-the-court", cat: "Casual" },
+  { name: "We Become What We Behold", slug: "we-become-what-we-behold", url: "https://ncase.itch.io/wbwwb", cat: "Casual" },
+  { name: "Friday Night Funkin'", slug: "friday-night-funkin", url: "https://ninja-muffin24.itch.io/funkin", cat: "Casual" },
+  { name: "The Evolution of Trust", slug: "evolution-of-trust", url: "https://ncase.me/trust/", cat: "Casual" },
+  { name: "Cookie Clicker", slug: "cookie-clicker", url: "https://orteil.dashnet.org/cookieclicker/", cat: "Casual" },
+  { name: "Infinite Craft", slug: "infinite-craft", url: "https://neal.fun/infinite-craft/", cat: "Casual" },
+  { name: "Stimulation Clicker", slug: "stimulation-clicker", url: "https://neal.fun/stimulation-clicker/", cat: "Casual" },
+  { name: "Park Baron", slug: "park-baron", url: "https://parkbaron.com/play", cat: "Casual" },
+  { name: "Seedbed", slug: "seedbed", url: "https://playseedbed.com/", cat: "Casual" },
+
+  /* ==================== HORROR (2) ==================== */
+  { name: "I Can Smell You from Here", slug: "i-can-smell-you-from-here", url: "https://catproblem9735.itch.io/i-can-smell-you-from-here", cat: "Horror" },
+  { name: "last seen online", slug: "last-seen-online", url: "https://qwook.itch.io/last-seen-online", cat: "Horror" },
+
+  /* ==================== RACING (2) ==================== */
+  { name: "Taipei Rush", slug: "taipei-rush", url: "https://www.taipei-rush.app/", cat: "Racing" },
+  { name: "Slow Roads", slug: "slow-roads", url: "https://slowroads.io/", cat: "Racing" },
+
+  /* ==================== SPORTS (3) ==================== */
+  { name: "Skate 3", slug: "skate-3", url: "https://skate.aaddpp.lol/", cat: "Sports" },
+  { name: "Skate Rust", slug: "skate-rust", url: "https://global-terror-skate-rust.fvc3less.workers.dev/full.html", cat: "Sports" },
+  { name: "PES 6", slug: "pes-6", url: "https://pes6.optijuegos.net/", cat: "Sports" },
+
+  /* ==================== ADVENTURE (2) ==================== */
+  { name: "The Margot Collapse", slug: "the-margot-collapse", url: "https://funday-games.itch.io/the-margot-collapse", cat: "Adventure" },
+  { name: "LEGO Island", slug: "lego-island", url: "https://isle.pizza/", cat: "Adventure" },
+
+  /* ==================== RETRO (10) ==================== */
+  { name: "Flash Games (878)", slug: "flash-games", url: "https://wasmarcade.com/flash-games", cat: "Retro" },
+  { name: "Arcade Classics (227)", slug: "arcade-classics", url: "https://wasmarcade.com/retro-games", cat: "Retro" },
+  { name: "DOOM", slug: "doom", url: "https://dos.zone/doom-dec-1993/", cat: "Retro" },
+  { name: "DOOM II", slug: "doom-2", url: "https://dos.zone/doom-ii-oct-10-1994/", cat: "Retro" },
+  { name: "Wolfenstein 3D", slug: "wolfenstein-3d", url: "https://dos.zone/wolfenstein-3d-may-05-1992/", cat: "Retro" },
+  { name: "Duke Nukem 3D", slug: "duke-nukem-3d", url: "https://dos.zone/duke-nukem-3d-1996/", cat: "Retro" },
+  { name: "Blood", slug: "blood", url: "https://dos.zone/blood-may-31-1997/", cat: "Retro" },
+  { name: "Prince of Persia", slug: "prince-of-persia", url: "https://dos.zone/prince-of-persia-1990/", cat: "Retro" },
+  { name: "3D Pinball: Space Cadet", slug: "space-cadet-pinball", url: "https://dos.zone/microsoft-3d-pinball-space-cadet/", cat: "Retro" },
+  { name: "The Need for Speed", slug: "need-for-speed", url: "https://dos.zone/the-need-for-speed-sep-1995/", cat: "Retro" },
+
+  /* ==================== SANDBOX (2) ==================== */
+  { name: "Tweetcraft", slug: "tweetcraft", url: "https://tweetcraft.jai.vin/", cat: "Sandbox" },
+  { name: "Minecraft Classic", slug: "minecraft-classic", url: "https://classic.minecraft.net/", cat: "Sandbox" }
+];
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function isAuthed() {
+  try {
+    const raw = localStorage.getItem(LS_AUTH);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (!s.t) return false;
+    if (Date.now() - s.t > IDLE_MS) {
+      localStorage.removeItem(LS_AUTH);
+      return false;
+    }
+    return true;
+  } catch { return false; }
+}
+
+function touchAuth() {
+  localStorage.setItem(LS_AUTH, JSON.stringify({ t: Date.now() }));
+}
+
+const LS_TOKEN = "gh_token";
+let historyCache = [];
+
+async function api(path, body, token) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = "Bearer " + token;
+  try {
+    const r = await fetch("/api/" + path, { method: "POST", headers, body: JSON.stringify(body || {}) });
+    let data = {};
+    try { data = await r.json(); } catch {}
+    return { ok: r.ok, status: r.status, data };
+  } catch {
+    return { ok: false, status: 0, data: { error: "Tidak bisa terhubung ke server." } };
+  }
+}
+
+function getHistory() { return historyCache; }
+
+function addHistory(slug) {
+  const g = games.find(x => x.slug === slug);
+  if (!g) return;
+  api("me", { action: "add", slug, name: g.name, cat: g.cat }, localStorage.getItem(LS_TOKEN));
+}
+
+const isPlayerPage = document.body.classList.contains("player-body");
+
+/* =========================================================
+   HALAMAN INDEX
+   ========================================================= */
+if (!isPlayerPage) {
+  let currentCat = "All";
+  let currentQuery = "";
+
+  let authMode = "login";
+  let adminToken = "";
+  let adminBans = [];
+
+  function show(id) { document.getElementById(id).classList.remove("hidden"); }
+  function hide(id) { document.getElementById(id).classList.add("hidden"); }
+
+  function showVerifikasi() {
+    const overlay = document.getElementById("verifikasiOverlay");
+    overlay.classList.remove("hidden");
+    setTimeout(() => overlay.classList.add("hidden"), 2000);
+  }
+
+  function openApp(username) {
+    hide("gate"); hide("authScreen");
+    show("app");
+    document.getElementById("userName").textContent = username || "";
+    renderChips();
+    renderHistory();
+    renderGrid();
+  }
+
+  function showAuth(msg) {
+    hide("gate"); hide("app");
+    show("authScreen");
+    document.getElementById("authErr").textContent = msg || "";
+  }
+
+  function banText(d) {
+    const until = d.until ? new Date(d.until).toLocaleString("id-ID") : "Permanen";
+    return "Akun kamu diblokir. Alasan: " + (d.reason || "-") + ". Berakhir: " + until + ".";
+  }
+
+  async function afterGate() {
+    hide("gate");
+    const token = localStorage.getItem(LS_TOKEN);
+    if (token) {
+      const r = await api("me", { action: "get" }, token);
+      if (r.ok) {
+        historyCache = r.data.history || [];
+        openApp(r.data.username);
+        return;
+      }
+      if (r.status === 401 || r.data.banned) localStorage.removeItem(LS_TOKEN);
+      showAuth(r.data.banned ? banText(r.data) : (r.status === 0 ? r.data.error : ""));
+      return;
+    }
+    showAuth();
+  }
+
+  function setAuthMode(m) {
+    authMode = m;
+    document.getElementById("tabLogin").classList.toggle("active", m === "login");
+    document.getElementById("tabReg").classList.toggle("active", m === "register");
+    document.getElementById("authPw2").classList.toggle("hidden", m !== "register");
+    document.getElementById("authBtn").textContent = m === "login" ? "MASUK" : "DAFTAR";
+    document.getElementById("authPw").autocomplete = m === "login" ? "current-password" : "new-password";
+    document.getElementById("authErr").textContent = "";
+  }
+
+  async function submitAuth() {
+    const u = document.getElementById("authUser").value.trim();
+    const p = document.getElementById("authPw").value;
+    const p2 = document.getElementById("authPw2").value;
+    const err = document.getElementById("authErr");
+    const btn = document.getElementById("authBtn");
+
+    if (!u || !p) { err.textContent = "Username dan password wajib diisi."; return; }
+    if (authMode === "register" && p !== p2) { err.textContent = "Password tidak sama."; return; }
+
+    btn.disabled = true;
+    const r = await api("auth", { action: authMode, username: u, password: p });
+    btn.disabled = false;
+
+    if (r.ok) {
+      localStorage.setItem(LS_TOKEN, r.data.token);
+      historyCache = r.data.history || [];
+      document.getElementById("authPw").value = "";
+      document.getElementById("authPw2").value = "";
+      openApp(r.data.username);
+    } else {
+      err.textContent = r.data.banned ? banText(r.data) : (r.data.error || "Gagal.");
+    }
+  }
+
+  async function logout() {
+    const token = localStorage.getItem(LS_TOKEN);
+    localStorage.removeItem(LS_TOKEN);
+    historyCache = [];
+    if (token) await api("auth", { action: "logout" }, token);
+    document.getElementById("authUser").value = "";
+    showAuth();
+  }
+
+  /* ---------- ADMIN PANEL ---------- */
+  function fmtLeft(until) {
+    if (!until) return "Permanent";
+    const ms = until - Date.now();
+    if (ms <= 0) return "Expired";
+    const m = Math.ceil(ms / 60000);
+    if (m >= 1440) { const d = Math.ceil(m / 1440); return d + (d === 1 ? " Day" : " Days"); }
+    if (m >= 60) { const h = Math.ceil(m / 60); return h + (h === 1 ? " Hour" : " Hours"); }
+    return m + " Min";
+  }
+
+  function admMsg(t, ok) {
+    const el = document.getElementById("admMsg");
+    el.textContent = t || "";
+    el.classList.toggle("ok", !!ok);
+  }
+
+  function openAdmin() {
+    hide("gate"); hide("authScreen"); hide("app");
+    show("adminScreen");
+    admMsg("");
+    loadBans();
+  }
+
+  async function closeAdmin() {
+    const t = adminToken;
+    adminToken = "";
+    hide("adminScreen");
+    show("gate");
+    document.getElementById("gatePw").value = "";
+    document.getElementById("gateErr").textContent = "";
+    if (t) await api("admin", { action: "logout" }, t);
+  }
+
+  async function loadBans() {
+    const r = await api("admin", { action: "list" }, adminToken);
+    if (r.status === 401) { closeAdmin(); return; }
+    if (!r.ok) { admMsg(r.data.error || "Gagal memuat."); return; }
+    adminBans = r.data.bans || [];
+    renderBans();
+  }
+
+  function renderBans() {
+    const q = document.getElementById("admSearch").value.toLowerCase().trim();
+    const list = adminBans.filter(b => !q || b.username.toLowerCase().includes(q));
+    const box = document.getElementById("admList");
+    if (!list.length) { box.innerHTML = '<div class="adm-empty">Tidak ada player yang diban.</div>'; return; }
+    box.innerHTML = list.map(b => `<div class="adm-row" title="${escapeHtml(b.reason || "")}">
+      <div class="adm-ava">${escapeHtml(b.username.charAt(0).toUpperCase())}</div>
+      <div class="adm-info">
+        <b>${escapeHtml(b.username)}</b>
+        <small>${escapeHtml(fmtLeft(b.until))}${b.reason ? " · " + escapeHtml(b.reason) : ""}</small>
+      </div>
+      <button type="button" class="adm-unban" data-u="${escapeHtml(b.username)}" title="Unban">&#8212;</button>
+    </div>`).join("");
+    box.querySelectorAll(".adm-unban").forEach(btn => {
+      btn.onclick = async () => {
+        const r = await api("admin", { action: "unban", username: btn.dataset.u }, adminToken);
+        if (r.ok) { admMsg("Unban " + btn.dataset.u + " berhasil.", true); loadBans(); }
+        else admMsg(r.data.error || "Gagal unban.");
+      };
+    });
+  }
+
+  async function doBan() {
+    const username = document.getElementById("admUser").value.trim();
+    const reason = document.getElementById("admReason").value.trim();
+    const duration = document.getElementById("admDur").value;
+    if (!username) { admMsg("Isi username dulu."); return; }
+    const btn = document.getElementById("admBan");
+    btn.disabled = true;
+    const r = await api("admin", { action: "ban", username, reason: reason || "Tidak ada alasan", duration }, adminToken);
+    btn.disabled = false;
+    if (r.status === 401) { closeAdmin(); return; }
+    if (r.ok) {
+      admMsg(username + " berhasil diban.", true);
+      document.getElementById("admUser").value = "";
+      document.getElementById("admReason").value = "";
+      loadBans();
+    } else admMsg(r.data.error || "Gagal ban.");
+  }
+
+  function initAuthUi() {
+    document.getElementById("tabLogin").onclick = () => setAuthMode("login");
+    document.getElementById("tabReg").onclick = () => setAuthMode("register");
+    document.getElementById("authBtn").onclick = submitAuth;
+    ["authUser", "authPw", "authPw2"].forEach(id =>
+      document.getElementById(id).addEventListener("keydown", e => { if (e.key === "Enter") submitAuth(); }));
+    document.getElementById("logoutBtn").onclick = logout;
+
+    document.getElementById("admBan").onclick = doBan;
+    document.getElementById("admRefresh").onclick = loadBans;
+    document.getElementById("admClose").onclick = closeAdmin;
+    document.getElementById("admSearch").addEventListener("input", renderBans);
+    document.getElementById("admReason").addEventListener("keydown", e => { if (e.key === "Enter") doBan(); });
+  }
+
+  async function tryGate() {
+    const input = document.getElementById("gatePw").value;
+    const err = document.getElementById("gateErr");
+    const card = document.querySelector("#gate .gate-card");
+    const btn = document.getElementById("gateBtn");
+
+    if (!input) { err.textContent = "Password tidak boleh kosong."; return; }
+
+    if (input === PASSWORD) {
+      touchAuth();
+      afterGate();
+      return;
+    }
+
+    /* bukan password biasa: cek kode admin (diverifikasi di server) */
+    btn.disabled = true;
+    const r = await api("admin", { action: "login", code: input });
+    btn.disabled = false;
+
+    if (r.ok && r.data.token) {
+      adminToken = r.data.token;
+      document.getElementById("gatePw").value = "";
+      openAdmin();
+      return;
+    }
+    if (r.status === 429) { err.textContent = r.data.error; return; }
+
+    err.textContent = "Password salah. Coba lagi.";
+    document.getElementById("gatePw").value = "";
+    card.classList.add("shake");
+    setTimeout(() => card.classList.remove("shake"), 400);
+    showVerifikasi();
+  }
+
+  function renderChips() {
+    const box = document.getElementById("chips");
+    const total = games.length;
+    const counts = {};
+    CATEGORIES.forEach(c => counts[c] = games.filter(g => g.cat === c).length);
+
+    let html = `<button class="chip ${currentCat === "All" ? "active" : ""}" data-cat="All">All <span class="cnt">${total}</span></button>`;
+
+    CATEGORIES.forEach(c => {
+      if (counts[c] > 0) {
+        html += `<button class="chip ${currentCat === c ? "active" : ""}" data-cat="${c}">${c} <span class="cnt">${counts[c]}</span></button>`;
+      }
+    });
+
+    box.innerHTML = html;
+    box.querySelectorAll(".chip").forEach(chip => {
+      chip.onclick = () => {
+        currentCat = chip.dataset.cat;
+        renderChips();
+        renderGrid();
+      };
+    });
+  }
+
+  function renderHistory() {
+    const hist = getHistory();
+    const section = document.getElementById("historySection");
+    const grid = document.getElementById("historyGrid");
+
+    if (hist.length === 0) { section.classList.add("hidden"); return; }
+    section.classList.remove("hidden");
+
+    grid.innerHTML = hist.map(h => {
+      const g = games.find(x => x.slug === h.slug);
+      if (!g) return "";
+      return `<a class="history-card" href="play.html?slug=${encodeURIComponent(g.slug)}">
+        <div class="history-thumb">
+          <img src="${IMG_BASE}${g.slug}.webp" alt="" loading="lazy" onerror="this.style.display='none'">
+        </div>
+        <span>${escapeHtml(g.name)}</span>
+      </a>`;
+    }).join("");
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+    const count = document.getElementById("count");
+    const q = currentQuery.toLowerCase().trim();
+
+    const list = games.filter(g => {
+      const mc = currentCat === "All" || g.cat === currentCat;
+      const mq = !q || g.name.toLowerCase().includes(q) || g.url.toLowerCase().includes(q) || g.cat.toLowerCase().includes(q);
+      return mc && mq;
+    });
+
+    count.textContent = q || currentCat !== "All"
+      ? `${list.length} hasil dari ${games.length} game`
+      : `${games.length} game tersedia`;
+
+    if (list.length === 0) {
+      grid.innerHTML = "";
+      empty.classList.remove("hidden");
+      return;
+    }
+    empty.classList.add("hidden");
+
+    grid.innerHTML = list.map(g => {
+      const init = g.name.trim().charAt(0).toUpperCase();
+      return `<div class="card">
+        <a href="play.html?slug=${encodeURIComponent(g.slug)}" class="card-link">
+          <div class="card-thumb">
+            <div class="card-cat" data-cat="${g.cat}">${g.cat}</div>
+            <div class="initial">${init}</div>
+            <img src="${IMG_BASE}${g.slug}.webp" alt="" loading="lazy" referrerpolicy="no-referrer"
+                 onload="this.classList.add('loaded')" onerror="this.remove()">
+          </div>
+          <div class="card-body">
+            <div class="card-title">${escapeHtml(g.name)}</div>
+          </div>
+        </a>
+        <button class="card-open-tab" data-url="${escapeHtml(g.url)}" title="Buka di Tab Baru">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </button>
+      </div>`;
+    }).join("");
+
+    grid.querySelectorAll(".card-open-tab").forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(btn.dataset.url, "_blank", "noopener");
+      };
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("gateBtn").onclick = tryGate;
+    document.getElementById("gatePw").addEventListener("keydown", e => {
+      if (e.key === "Enter") tryGate();
+    });
+
+    document.getElementById("clearHistoryBtn").onclick = () => {
+      if (confirm("Hapus semua riwayat?")) {
+        historyCache = [];
+        api("me", { action: "clear" }, localStorage.getItem(LS_TOKEN));
+        renderHistory();
+      }
+    };
+
+    let timer;
+    document.getElementById("search").addEventListener("input", e => {
+      currentQuery = e.target.value;
+      clearTimeout(timer);
+      timer = setTimeout(renderGrid, 80);
+    });
+
+    document.getElementById("totalFoot").textContent = games.length;
+
+    initAuthUi();
+
+    if (isAuthed()) {
+      touchAuth();
+      afterGate();
+    }
+
+    ["click", "keydown", "touchstart"].forEach(evt => {
+      document.addEventListener(evt, () => { if (isAuthed()) touchAuth(); }, { passive: true });
+    });
+  });
+}
+
+/* =========================================================
+   HALAMAN PLAYER
+   ========================================================= */
+if (isPlayerPage) {
+  document.addEventListener("DOMContentLoaded", async () => {
+    if (!isAuthed()) {
+      location.href = "index.html";
+      return;
+    }
+
+    const me = await api("me", { action: "get" }, localStorage.getItem(LS_TOKEN));
+    if (!me.ok) {
+      if (me.status === 401 || me.data.banned) localStorage.removeItem(LS_TOKEN);
+      location.href = "index.html";
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const slug = params.get("slug");
+    const game = games.find(g => g.slug === slug);
+
+    if (!game) {
+      document.getElementById("playerTitle").textContent = "Game tidak ditemukan";
+      document.getElementById("loading").innerHTML = "<p>Game tidak ditemukan.</p>";
+      return;
+    }
+
+    document.title = game.name + " — Game Hub";
+    document.getElementById("playerTitle").textContent = game.name;
+    document.getElementById("openNewTab").href = game.url;
+    document.getElementById("fallbackBtn").href = game.url;
+
+    addHistory(slug);
+
+    const frame = document.getElementById("gameFrame");
+    const loading = document.getElementById("loading");
+    const fallback = document.getElementById("fallback");
+
+    let loaded = false;
+    let fallbackShown = false;
+
+    function showFallback() {
+      if (fallbackShown) return;
+      fallbackShown = true;
+      loading.classList.add("hidden");
+      frame.classList.add("hidden");
+      frame.src = "about:blank";
+      fallback.classList.remove("hidden");
+    }
+
+    if (!canEmbed(game.url)) {
+      showFallback();
+    } else {
+      frame.setAttribute("referrerpolicy", "no-referrer");
+      frame.addEventListener("load", () => {
+        if (fallbackShown) return;
+        loaded = true;
+        loading.classList.add("hidden");
+        frame.classList.remove("hidden");
+      });
+      frame.addEventListener("error", showFallback);
+      frame.src = game.url;
+
+      setTimeout(() => { if (!loaded) showFallback(); }, 8000);
+    }
+
+    document.getElementById("backBtn").addEventListener("click", e => {
+      e.preventDefault();
+      location.href = "index.html";
+    });
+
+    const fsBtn = document.getElementById("fullscreenBtn");
+    const fsIcon = document.getElementById("fsIcon");
+    const body = document.body;
+
+    const iconExpand = `<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>`;
+    const iconShrink = `<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>`;
+
+    function isFullscreen() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    function updateFsIcon() {
+      fsIcon.innerHTML = isFullscreen() ? iconShrink : iconExpand;
+    }
+
+    async function toggleFullscreen() {
+      try {
+        if (!isFullscreen()) {
+          if (frame.requestFullscreen || frame.webkitRequestFullscreen) {
+            try {
+              await (frame.requestFullscreen ? frame.requestFullscreen() : Promise.resolve(frame.webkitRequestFullscreen()));
+              updateFsIcon();
+              return;
+            } catch (e) {}
+          }
+          if (body.requestFullscreen) await body.requestFullscreen();
+          else if (body.webkitRequestFullscreen) body.webkitRequestFullscreen();
+          else if (body.msRequestFullscreen) body.msRequestFullscreen();
+        } else {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          else if (document.msExitFullscreen) document.msExitFullscreen();
+        }
+        updateFsIcon();
+      } catch (err) {
+        console.warn("Fullscreen gagal:", err);
+      }
+    }
+
+    fsBtn.addEventListener("click", toggleFullscreen);
+
+    ["fullscreenchange", "webkitfullscreenchange"].forEach(evt => {
+      document.addEventListener(evt, updateFsIcon);
+    });
+
+    document.addEventListener("keydown", e => {
+      if ((e.key === "f" || e.key === "F") && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+        toggleFullscreen();
+      }
+    });
+  });
+   }
