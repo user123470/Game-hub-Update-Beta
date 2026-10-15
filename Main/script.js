@@ -596,6 +596,7 @@ if (!isPlayerPage) {
   }
 
   /* ---------- ADMIN PANEL ---------- */
+  /* ---------- ADMIN PANEL ---------- */
   function fmtLeft(until) {
     if (!until) return "Permanent";
     const ms = until - Date.now();
@@ -622,6 +623,7 @@ if (!isPlayerPage) {
   async function closeAdmin() {
     const t = adminToken;
     adminToken = "";
+    closePicker();
     hide("adminScreen");
     show("gate");
     document.getElementById("gatePw").value = "";
@@ -653,7 +655,7 @@ if (!isPlayerPage) {
     box.querySelectorAll(".adm-unban").forEach(btn => {
       btn.onclick = async () => {
         const r = await api("admin", { action: "unban", username: btn.dataset.u }, adminToken);
-        if (r.ok) { admMsg("Unban " + btn.dataset.u + " berhasil.", true); loadBans(); }
+        if (r.ok) { admMsg("Unban " + btn.dataset.u + " berhasil.", true); loadBans(); refreshPicker(); }
         else admMsg(r.data.error || "Gagal unban.");
       };
     });
@@ -663,7 +665,7 @@ if (!isPlayerPage) {
     const username = document.getElementById("admUser").value.trim();
     const reason = document.getElementById("admReason").value.trim();
     const duration = document.getElementById("admDur").value;
-    if (!username) { admMsg("Isi username dulu."); return; }
+    if (!username) { admMsg("Isi username dulu, atau tekan PILIH."); return; }
     const btn = document.getElementById("admBan");
     btn.disabled = true;
     const r = await api("admin", { action: "ban", username, reason: reason || "Tidak ada alasan", duration }, adminToken);
@@ -674,7 +676,85 @@ if (!isPlayerPage) {
       document.getElementById("admUser").value = "";
       document.getElementById("admReason").value = "";
       loadBans();
+      refreshPicker();
     } else admMsg(r.data.error || "Gagal ban.");
+  }
+
+  /* ---------- BAN ALL ---------- */
+  async function doBanAll() {
+    const reason = document.getElementById("admReason").value.trim();
+    const sel = document.getElementById("admDur");
+    const durText = sel.options[sel.selectedIndex].text;
+    if (!confirm("BAN SEMUA PLAYER selama " + durText + "?\n\nSemua akun yang terdaftar akan diblokir dari website.")) return;
+    const btn = document.getElementById("admBanAll");
+    btn.disabled = true;
+    admMsg("Memproses...", true);
+    const r = await api("admin", { action: "banall", reason: reason || "Tidak ada alasan", duration: sel.value }, adminToken);
+    btn.disabled = false;
+    if (r.status === 401) { closeAdmin(); return; }
+    if (r.ok) {
+      admMsg(r.data.count + " player berhasil diban" + (r.data.skipped ? " (" + r.data.skipped + " sudah diban)." : "."), true);
+      loadBans();
+      refreshPicker();
+    } else admMsg(r.data.error || "Gagal ban all.");
+  }
+
+  /* ---------- PILIH PLAYER (tanpa perlu tahu username) ---------- */
+  let adminPlayers = [];
+  let pickerTimer = null;
+
+  function openPicker() {
+    show("admPicker");
+    document.getElementById("admPickSearch").value = "";
+    document.getElementById("admPickList").innerHTML = '<div class="adm-empty">Memuat...</div>';
+    refreshPicker();
+    clearInterval(pickerTimer);
+    pickerTimer = setInterval(refreshPicker, 10000); // status online diperbarui tiap 10 detik
+  }
+
+  function closePicker() {
+    clearInterval(pickerTimer);
+    pickerTimer = null;
+    const el = document.getElementById("admPicker");
+    if (el) el.classList.add("hidden");
+  }
+
+  async function refreshPicker() {
+    const el = document.getElementById("admPicker");
+    if (!el || el.classList.contains("hidden") || !adminToken) return;
+    const r = await api("admin", { action: "players" }, adminToken);
+    if (r.status === 401) { closeAdmin(); return; }
+    if (!r.ok) {
+      document.getElementById("admPickList").innerHTML = '<div class="adm-empty">' + escapeHtml(r.data.error || "Gagal memuat.") + "</div>";
+      return;
+    }
+    adminPlayers = r.data.players || [];
+    document.getElementById("admPickCount").textContent =
+      "(" + (r.data.online || 0) + " online / " + adminPlayers.length + ")";
+    renderPicker();
+  }
+
+  function renderPicker() {
+    const q = document.getElementById("admPickSearch").value.toLowerCase().trim();
+    const list = adminPlayers.filter(p => !q || p.username.toLowerCase().includes(q));
+    const box = document.getElementById("admPickList");
+    if (!list.length) { box.innerHTML = '<div class="adm-empty">Tidak ada player.</div>'; return; }
+    box.innerHTML = list.map(p => `<div class="adm-row adm-pickrow" data-u="${escapeHtml(p.username)}">
+      <div class="adm-ava">${escapeHtml(p.username.charAt(0).toUpperCase())}</div>
+      <div class="adm-info">
+        <b>${escapeHtml(p.username)}</b>
+        <small>${p.banned ? "Sedang diban" : (p.online ? "Online" : "Offline")}</small>
+      </div>
+      <i class="adm-dot ${p.online ? "on" : "off"}" title="${p.online ? "Online" : "Offline"}"></i>
+    </div>`).join("");
+    box.querySelectorAll(".adm-pickrow").forEach(row => {
+      row.onclick = () => {
+        document.getElementById("admUser").value = row.dataset.u;
+        closePicker();
+        admMsg("Player dipilih: " + row.dataset.u + ". Isi reason lalu tekan BAN USER.", true);
+        document.getElementById("admReason").focus();
+      };
+    });
   }
 
   function initAuthUi() {
@@ -686,12 +766,16 @@ if (!isPlayerPage) {
     document.getElementById("logoutBtn").onclick = logout;
 
     document.getElementById("admBan").onclick = doBan;
-    document.getElementById("admRefresh").onclick = loadBans;
+    document.getElementById("admBanAll").onclick = doBanAll;
+    document.getElementById("admPick").onclick = openPicker;
+    document.getElementById("admPickClose").onclick = closePicker;
+    document.getElementById("admPickSearch").addEventListener("input", renderPicker);
+    document.getElementById("admPicker").addEventListener("click", e => { if (e.target.id === "admPicker") closePicker(); });
+    document.getElementById("admRefresh").onclick = () => { loadBans(); refreshPicker(); };
     document.getElementById("admClose").onclick = closeAdmin;
     document.getElementById("admSearch").addEventListener("input", renderBans);
     document.getElementById("admReason").addEventListener("keydown", e => { if (e.key === "Enter") doBan(); });
-  }
-
+       }
   async function tryGate() {
     const input = document.getElementById("gatePw").value;
     const err = document.getElementById("gateErr");
@@ -985,3 +1069,20 @@ if (isPlayerPage) {
     });
   });
    }
+
+/* =========================================================
+   HEARTBEAT: tandai player online + tendang kalau kena ban
+   ========================================================= */
+setInterval(async () => {
+  const token = localStorage.getItem(LS_TOKEN);
+  if (!token) return;
+  const appEl = document.getElementById("app");
+  const inApp = isPlayerPage || (appEl && !appEl.classList.contains("hidden"));
+  if (!inApp) return;
+  const r = await api("me", { action: "ping" }, token);
+  if (r.status === 401 || r.data.banned) {
+    localStorage.removeItem(LS_TOKEN);
+    location.reload();
+  }
+}, 40000);
+
