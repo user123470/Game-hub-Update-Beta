@@ -11,20 +11,31 @@ module.exports = async (req, res) => {
       return d.send(res, 200, { ok: true });
     }
 
-    if (b.action !== "register" && b.action !== "login")
+    if (!["register", "login", "banstatus"].includes(b.action))
       return d.send(res, 400, { error: "Aksi tidak valid." });
 
-    if (!(await d.rateLimit(req, "auth", 20, 300)))
+    if (!(await d.rateLimit(req, "auth", 30, 300)))
       return d.send(res, 429, { error: "Terlalu banyak percobaan. Coba lagi 5 menit lagi." });
 
     const username = typeof b.username === "string" ? b.username.trim() : "";
     const password = b.password;
+
+    /* cek status ban sebuah username (dipakai layar ban) */
+    if (b.action === "banstatus") {
+      if (!d.validUsername(username)) return d.send(res, 200, { banned: false });
+      const ban = await d.getBan(username);
+      return d.send(res, 200, ban ? d.banInfo(ban) : { banned: false });
+    }
 
     if (b.action === "register") {
       if (!d.validUsername(username))
         return d.send(res, 400, { error: "Username 3-16 karakter: huruf, angka, atau underscore." });
       if (!d.validPassword(password))
         return d.send(res, 400, { error: "Password minimal 6 karakter." });
+
+      /* username yang diban (termasuk ban permanen yang akunnya sudah dihapus) tidak bisa didaftarkan */
+      const ban = await d.getBan(username);
+      if (ban) return d.send(res, 403, d.banInfo(ban));
 
       const salt = d.crypto.randomBytes(16).toString("hex");
       const hash = (await d.scrypt(password, salt)).toString("hex");
@@ -43,15 +54,20 @@ module.exports = async (req, res) => {
       return d.send(res, 401, { error: "Username atau password salah." });
 
     const raw = await d.redis(["GET", "user:" + d.lower(username)]);
-    if (!raw) return d.send(res, 401, { error: "Username atau password salah." });
+    if (!raw) {
+      /* akun sudah dihapus karena ban permanen -> tetap tampilkan layar ban */
+      const ban = await d.getBan(username);
+      if (ban) return d.send(res, 403, d.banInfo(ban));
+      return d.send(res, 401, { error: "Username atau password salah." });
+    }
     const user = JSON.parse(raw);
+
+    const ban = await d.getBan(username);
+    if (ban) return d.send(res, 403, d.banInfo(ban));
 
     const hash = (await d.scrypt(password, user.salt)).toString("hex");
     if (!d.safeEqual(hash, user.hash))
       return d.send(res, 401, { error: "Username atau password salah." });
-
-    const ban = await d.getBan(username);
-    if (ban) return d.send(res, 403, { banned: true, reason: ban.reason, until: ban.until || 0, error: "Akun diblokir." });
 
     const token = d.crypto.randomBytes(32).toString("hex");
     await d.redis(["SET", "sess:" + token, d.lower(username), "EX", d.SESSION_TTL]);

@@ -65,12 +65,16 @@ async function applyBan(real, reason, duration) {
     username: real,
     reason: String(reason || "Tidak ada alasan").slice(0, 200),
     until: ms ? Date.now() + ms : 0,
+    permanent: !ms,
     at: Date.now()
   };
   const cmd = ["SET", "ban:" + d.lower(real), JSON.stringify(ban)];
   if (ms) cmd.push("PX", ms + 60000);
   await d.redis(cmd);
   await d.redis(["SADD", "banset", d.lower(real)]);
+  /* ban permanen: hapus data akun (password, riwayat) supaya database hemat.
+     Catatan ban kecil tetap disimpan agar username ini tidak bisa daftar lagi. */
+  if (!ms) await d.redis(["DEL", "user:" + d.lower(real), "online:" + d.lower(real)]);
   return ban;
 }
 

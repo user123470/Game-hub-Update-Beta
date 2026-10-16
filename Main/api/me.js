@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     if (!name) return d.send(res, 401, { error: "Sesi habis. Silakan login lagi." });
 
     const ban = await d.getBan(name);
-    if (ban) return d.send(res, 403, { banned: true, reason: ban.reason, until: ban.until || 0, error: "Akun diblokir." });
+    if (ban) return d.send(res, 403, d.banInfo(ban));
 
     const raw = await d.redis(["GET", "user:" + name]);
     if (!raw) return d.send(res, 401, { error: "Akun tidak ditemukan." });

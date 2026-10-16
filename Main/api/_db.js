@@ -45,6 +45,17 @@ async function rateLimit(req, name, max, windowSec) {
   return n <= max;
 }
 
+function banInfo(ban) {
+  return {
+    banned: true,
+    username: ban.username,
+    reason: ban.reason,
+    until: ban.until || 0,
+    permanent: !ban.until,
+    error: "Akun diblokir."
+  };
+}
+
 function validUsername(u) { return typeof u === "string" && /^[A-Za-z0-9_]{3,16}$/.test(u); }
 function validPassword(p) { return typeof p === "string" && p.length >= 6 && p.length <= 64; }
 const lower = (u) => String(u).toLowerCase();
@@ -87,5 +98,5 @@ async function isAdmin(req) {
 module.exports = {
   ADMIN_CODE, SESSION_TTL, ADMIN_TTL, crypto, redis, send, body, bearer,
   rateLimit, validUsername, validPassword, lower, scrypt, safeEqual,
-  getBan, sessionUser, isAdmin
+  getBan, banInfo, sessionUser, isAdmin
 };
