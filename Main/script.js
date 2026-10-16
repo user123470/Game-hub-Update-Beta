@@ -438,7 +438,18 @@ const games = [
 
   /* ==================== SANDBOX (2) ==================== */
   { name: "Tweetcraft", slug: "tweetcraft", url: "https://tweetcraft.jai.vin/", cat: "Sandbox" },
-  { name: "Minecraft Classic", slug: "minecraft-classic", url: "https://classic.minecraft.net/", cat: "Sandbox" }
+  { name: "Minecraft Classic", slug: "minecraft-classic", url: "https://classic.minecraft.net/", cat: "Sandbox" },
+
+  /* ==================== BARU: game open-source / boleh di-embed ==================== */
+  { name: "Hextris", slug: "hextris", url: "https://hextris.github.io/hextris/", cat: "Puzzle" },
+  { name: "React Tetris", slug: "react-tetris", url: "https://chvin.github.io/react-tetris/", cat: "Puzzle" },
+  { name: "Lichess Puzzle", slug: "lichess-puzzle", url: "https://lichess.org/training/frame?theme=brown&bg=dark", cat: "Puzzle" },
+  { name: "Clumsy Bird", slug: "clumsy-bird", url: "https://ellisonleao.github.io/clumsy-bird/", cat: "Casual" },
+  { name: "Floppy Bird", slug: "floppy-bird", url: "https://nebez.github.io/floppybird/", cat: "Casual" },
+  { name: "Astray (Maze)", slug: "astray-maze", url: "https://wwwtyro.github.io/Astray/", cat: "Casual" },
+  { name: "Spend Bill Gates' Money", slug: "spend-gates-money", url: "https://neal.fun/spend/", cat: "Casual" },
+  { name: "Draw a Perfect Circle", slug: "perfect-circle", url: "https://neal.fun/perfect-circle/", cat: "Casual" },
+  { name: "Absurd Trolley Problems", slug: "absurd-trolley", url: "https://neal.fun/absurd-trolley-problems/", cat: "Casual" }
 ];
 
 /* =========================================================
@@ -492,6 +503,15 @@ function addHistory(slug) {
   api("me", { action: "add", slug, name: g.name, cat: g.cat }, localStorage.getItem(LS_TOKEN));
 }
 
+const LS_BAN = "gh_ban";
+function saveBan(d) {
+  localStorage.setItem(LS_BAN, JSON.stringify({
+    username: d.username || "", reason: d.reason || "", until: d.until || 0, permanent: !d.until
+  }));
+}
+function clearBan() { localStorage.removeItem(LS_BAN); }
+function loadBan() { try { return JSON.parse(localStorage.getItem(LS_BAN)); } catch { return null; } }
+
 const isPlayerPage = document.body.classList.contains("player-body");
 
 /* =========================================================
@@ -534,8 +554,67 @@ if (!isPlayerPage) {
     return "Akun kamu diblokir. Alasan: " + (d.reason || "-") + ". Berakhir: " + until + ".";
   }
 
+  let banTimer = null;
+
+  function showBan(info) {
+    hide("gate"); hide("app"); hide("authScreen"); hide("adminScreen");
+    show("banScreen");
+    document.getElementById("banUser").textContent = info.username || "-";
+    document.getElementById("banReason").textContent = info.reason || "-";
+    document.getElementById("banMsg").textContent = "";
+    const left = document.getElementById("banLeft");
+    clearInterval(banTimer);
+    const tick = () => {
+      if (!info.until) { left.textContent = "Permanen"; return; }
+      const ms = info.until - Date.now();
+      if (ms <= 0) { left.textContent = "Sudah berakhir. Tekan Cek Status."; clearInterval(banTimer); return; }
+      const s = Math.floor(ms / 1000);
+      const dd = Math.floor(s / 86400), hh = Math.floor((s % 86400) / 3600);
+      const mm = Math.floor((s % 3600) / 60), ss = s % 60;
+      left.textContent = (dd ? dd + "hr " : "") + (dd || hh ? hh + "j " : "") + mm + "m " + ss + "d";
+    };
+    tick();
+    banTimer = setInterval(tick, 1000);
+  }
+
+  async function checkBan() {
+    const stored = loadBan();
+    const btn = document.getElementById("banCheck");
+    const msg = document.getElementById("banMsg");
+    btn.disabled = true;
+    const r = stored && stored.username
+      ? await api("auth", { action: "banstatus", username: stored.username })
+      : { ok: true, data: { banned: false } };
+    btn.disabled = false;
+    if (r.ok && r.data.banned) {
+      saveBan(r.data);
+      showBan(r.data);
+      document.getElementById("banMsg").textContent = "Akun masih diblokir.";
+      return;
+    }
+    if (r.ok) {
+      clearBan();
+      clearInterval(banTimer);
+      hide("banScreen");
+      showAuth();
+      return;
+    }
+    msg.textContent = r.data.error || "Gagal cek status.";
+  }
+
   async function afterGate() {
     hide("gate");
+
+    /* perangkat ini pernah kena ban? cek ke server dulu */
+    const stored = loadBan();
+    if (stored && stored.username) {
+      const r = await api("auth", { action: "banstatus", username: stored.username });
+      if (r.ok && r.data.banned) { saveBan(r.data); showBan(r.data); return; }
+      if (r.ok) clearBan(); else { showBan(stored); return; }
+    } else if (stored) {
+      clearBan();
+    }
+
     const token = localStorage.getItem(LS_TOKEN);
     if (token) {
       const r = await api("me", { action: "get" }, token);
@@ -545,7 +624,8 @@ if (!isPlayerPage) {
         return;
       }
       if (r.status === 401 || r.data.banned) localStorage.removeItem(LS_TOKEN);
-      showAuth(r.data.banned ? banText(r.data) : (r.status === 0 ? r.data.error : ""));
+      if (r.data.banned) { saveBan(r.data); showBan(r.data); return; }
+      showAuth(r.status === 0 ? r.data.error : "");
       return;
     }
     showAuth();
@@ -582,7 +662,8 @@ if (!isPlayerPage) {
       document.getElementById("authPw2").value = "";
       openApp(r.data.username);
     } else {
-      err.textContent = r.data.banned ? banText(r.data) : (r.data.error || "Gagal.");
+      if (r.data.banned) { saveBan(r.data); showBan(r.data); return; }
+      err.textContent = r.data.error || "Gagal.";
     }
   }
 
@@ -665,6 +746,7 @@ if (!isPlayerPage) {
     const reason = document.getElementById("admReason").value.trim();
     const duration = document.getElementById("admDur").value;
     if (!username) { admMsg("Isi username dulu, atau tekan PILIH."); return; }
+    if (duration === "perm" && !confirm("Ban PERMANEN akan MENGHAPUS akun " + username + " (password & riwayat) dari database.\n\nLanjut?")) return;
     const btn = document.getElementById("admBan");
     btn.disabled = true;
     const r = await api("admin", { action: "ban", username, reason: reason || "Tidak ada alasan", duration }, adminToken);
@@ -684,7 +766,8 @@ if (!isPlayerPage) {
     const reason = document.getElementById("admReason").value.trim();
     const sel = document.getElementById("admDur");
     const durText = sel.options[sel.selectedIndex].text;
-    if (!confirm("BAN SEMUA PLAYER selama " + durText + "?\n\nSemua akun yang terdaftar akan diblokir dari website.")) return;
+    const permWarn = sel.value === "perm" ? "\n\nPERMANEN = SEMUA akun akan DIHAPUS dari database!" : "";
+    if (!confirm("BAN SEMUA PLAYER selama " + durText + "?" + permWarn + "\n\nSemua akun yang terdaftar akan diblokir dari website.")) return;
     const btn = document.getElementById("admBanAll");
     btn.disabled = true;
     admMsg("Memproses...", true);
@@ -763,6 +846,7 @@ if (!isPlayerPage) {
     ["authUser", "authPw", "authPw2"].forEach(id =>
       document.getElementById(id).addEventListener("keydown", e => { if (e.key === "Enter") submitAuth(); }));
     document.getElementById("logoutBtn").onclick = logout;
+    document.getElementById("banCheck").onclick = checkBan;
 
     document.getElementById("admBan").onclick = doBan;
     document.getElementById("admBanAll").onclick = doBanAll;
@@ -958,6 +1042,7 @@ if (isPlayerPage) {
 
     const me = await api("me", { action: "get" }, localStorage.getItem(LS_TOKEN));
     if (!me.ok) {
+      if (me.data.banned) saveBan(me.data);
       if (me.status === 401 || me.data.banned) localStorage.removeItem(LS_TOKEN);
       location.href = "index.html";
       return;
@@ -1081,6 +1166,7 @@ setInterval(async () => {
   if (!inApp) return;
   const r = await api("me", { action: "ping" }, token);
   if (r.status === 401 || r.data.banned) {
+    if (r.data.banned) saveBan(r.data);
     localStorage.removeItem(LS_TOKEN);
     location.reload();
   }

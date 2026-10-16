@@ -1001,3 +1001,60 @@ select.adm-in { appearance: none; -webkit-appearance: none; cursor: pointer;
   color: #a5a5aa;
 }
 .adm-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+
+/* ===== LAYAR BAN ===== */
+.ban-screen {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,92,92,0.14), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,92,92,0.06), transparent 60%),
+    var(--bg);
+  z-index: 140;
+}
+.ban-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px 24px;
+  text-align: center;
+  background: rgba(20,22,26,0.9);
+  border: 1px solid rgba(255,92,92,0.35);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(255,92,92,0.12);
+}
+.ban-icon { font-size: 54px; line-height: 1; margin-bottom: 12px; }
+.ban-card h1 { font-size: 24px; font-weight: 900; letter-spacing: 0.08em; color: var(--danger); }
+.ban-sub { margin: 8px 0 20px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.ban-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.ban-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border-hi);
+  border-radius: 12px;
+}
+.ban-info span { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; color: var(--muted); }
+.ban-info b { font-size: 14px; font-weight: 700; color: var(--text); word-break: break-word; }
+#banCheck {
+  width: 100%;
+  padding: 14px;
+  font: 800 13px inherit;
+  font-family: inherit;
+  letter-spacing: 0.2em;
+  color: var(--text);
+  background: var(--surface-hi);
+  border: 1px solid var(--border-hi);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+#banCheck:hover { border-color: var(--danger); background: rgba(255,92,92,0.1); }
+#banCheck:disabled { opacity: 0.6; cursor: wait; }
+.ban-msg { min-height: 18px; margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--danger); }
