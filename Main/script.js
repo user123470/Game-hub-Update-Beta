@@ -37,6 +37,8 @@ const CATEGORIES = [
 const games = [
   /* ==================== PC (42) ==================== */
   { name: "Grand Theft Auto V (wasm)", slug: "gta-v-wasm", url: WASM_BASE + "/gta-5", cat: "PC" },
+  { name: "GTA 5 mobile & desktop", slug: "GTA-5-mobile-&-desktop", url: "https://v2.fiveplay.lol/launcher.html", cat: "PC" },
+  { name: "GTA vice city mobile & desktop", slug: "GTA-vice-city-mobile-&-desktop", url: "https://gta.rabisco.net/", cat: "PC" },
   { name: "GTA: Vice City (wasm)", slug: "vice-city-wasm", url: WASM_BASE + "/vice-city", cat: "PC" },
   { name: "GTA III", slug: "gta-3", url: WASM_BASE + "/gta3", cat: "PC" },
   { name: "The Simpsons: Hit & Run (wasm)", slug: "simpsons-wasm", url: WASM_BASE + "/simpsons", cat: "PC" },
