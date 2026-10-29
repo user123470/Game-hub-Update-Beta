@@ -15,6 +15,8 @@ const WASM_RIP = "https://wasm.rip/files";
    Kalau kamu lihat ikon muka sedih di player, tambahin domainnya di sini
    supaya langsung muncul tombol "Buka di Tab Baru" tanpa nunggu. */
 const NO_EMBED_HOSTS = [
+  "https://dezm0n.itch.io/",
+  "https://justplayweb.com/",
   "nytimes.com",
   "web.archive.org"
 ];
