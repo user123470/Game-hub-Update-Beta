@@ -38,6 +38,7 @@ const CATEGORIES = [
    ========================================================= */
 const games = [
   /* ==================== PC (42) ==================== */
+  { name: "Need For Speed Wanted", slug: "Need-For-Speed-Wanted", url: "https://dezm0n.itch.io/nfs-most-wanted-web-port", cat: "PC" },
   { name: "Grand Theft Auto V (wasm)", slug: "gta-v-wasm", url: WASM_BASE + "/gta-5", cat: "PC" },
   { name: "GTA 5 mobile & desktop", slug: "GTA-5-mobile-&-desktop", url: "https://v2.fiveplay.lol/launcher.html", cat: "PC" },
   { name: "GTA vice city mobile & desktop", slug: "GTA-vice-city-mobile-&-desktop", url: "https://gta.rabisco.net/", cat: "PC" },
