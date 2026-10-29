@@ -459,7 +459,7 @@ const games = [
   { name: "Absurd Trolley Problems", slug: "absurd-trolley", url: "https://neal.fun/absurd-trolley-problems/", cat: "Casual" },
 
   /* ==================== JUSTPLAYWEB (jpw) ==================== */
-  { name: "Car Crash Test jpw", slug: "jpw-car-crash-test", url: JPW_GAME + "car-crash-test" + "/", img: JPW_THUMB + "car-crash-test" + ".webp", cat: "Racing" },
+  { name: "Car Crash Test jpw", slug: "jpw-car-crash-test", url: "https://play.gamepix.com/car-crash-test/embed?sid=1", img: JPW_THUMB + "car-crash-test" + ".webp", cat: "Racing" },
   { name: "Minecraft Classic jpw", slug: "jpw-minecraft-classic", url: JPW_GAME + "minecraft-classic" + "/", img: JPW_THUMB + "minecraft-classic" + ".webp", cat: "Casual" },
   { name: "Warfare 1942 jpw", slug: "jpw-warfare-1942", url: JPW_GAME + "warfare-1942" + "/", img: JPW_THUMB + "warfare-1942" + ".webp", cat: "Shooter" },
   { name: "DOOM Shareware jpw", slug: "jpw-doom-shareware", url: JPW_GAME + "doom-shareware" + "/", img: JPW_THUMB + "doom-shareware" + ".webp", cat: "Shooter" },
