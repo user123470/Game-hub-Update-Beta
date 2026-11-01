@@ -41,6 +41,7 @@ const CATEGORIES = [
 const games = [
   /* ==================== PC (42) ==================== */
   { name: "Need For Speed Underground 2", slug: "Need-For-Speed-Underground-2", url: "https://nfsu2.xyz", cat: "PC" },
+  { name: "horsey game", slug: "horsey-game", url: "https://woahhcrackers.github.io/HorseyGameWeb/", cat: "PC" },
   { name: "Need For Speed Wanted", slug: "Need-For-Speed-Wanted", url: "https://web.nfsmwo.com", cat: "PC" },
   { name: "Grand Theft Auto V (wasm)", slug: "gta-v-wasm", url: WASM_BASE + "/gta-5", cat: "PC" },
   { name: "GTA 5 mobile & desktop", slug: "GTA-5-mobile-&-desktop", url: "https://v2.fiveplay.lol/launcher.html", cat: "PC" },
