@@ -142,31 +142,128 @@
       </svg>
       <input type="text" id="search" placeholder="Cari game..." autocomplete="off">
     </div>
-    <div class="user-chip">
+    <button type="button" class="user-chip" id="userChip" title="Pengaturan">
+      <span class="ava sm" id="topAva"></span>
       <span id="userName"></span>
-      <button type="button" id="logoutBtn">Keluar</button>
-    </div>
+    </button>
   </header>
 
   <main>
-    <section id="historySection" class="history-section hidden">
-      <div class="section-head">
-        <h2>Terakhir Dimainkan</h2>
-        <button id="clearHistoryBtn" class="text-btn">Hapus riwayat</button>
+    <section id="view-home" class="view">
+      <div class="meta"><span id="count">Memuat...</span></div>
+      <div id="chips" class="chips"></div>
+      <div id="grid" class="grid"></div>
+      <div id="empty" class="empty hidden">
+        <div class="empty-icon">🔍</div>
+        <p>Tidak ada game yang cocok.</p>
       </div>
-      <div id="historyGrid" class="history-row"></div>
     </section>
 
-    <div class="meta"><span id="count">Memuat...</span></div>
-    <div id="chips" class="chips"></div>
-    <div id="grid" class="grid"></div>
-    <div id="empty" class="empty hidden">
-      <div class="empty-icon">🔍</div>
-      <p>Tidak ada game yang cocok.</p>
-    </div>
+    <section id="view-history" class="view hidden">
+      <div class="section-head">
+        <h2>Riwayat</h2>
+        <button id="clearHistoryBtn" class="text-btn">Hapus riwayat</button>
+      </div>
+      <div id="historyGrid" class="grid"></div>
+      <div id="historyEmpty" class="empty hidden">
+        <div class="empty-icon">🕘</div>
+        <p>Belum ada game yang dimainkan.</p>
+      </div>
+    </section>
+
+    <section id="view-fav" class="view hidden">
+      <div class="section-head"><h2>Favorit</h2></div>
+      <div id="favGrid" class="grid"></div>
+      <div id="favEmpty" class="empty hidden">
+        <div class="empty-icon">💜</div>
+        <p>Belum ada favorit. Tekan ikon hati di kartu game.</p>
+      </div>
+    </section>
+
+    <section id="view-chat" class="view hidden">
+      <div class="section-head">
+        <h2>Chat</h2>
+        <span class="chat-note">Pesan hilang otomatis setelah 1 jam</span>
+      </div>
+      <div class="chat-wrap">
+        <div id="chatBox" class="chat-box"></div>
+        <p id="chatErr" class="chat-err"></p>
+        <div class="chat-input">
+          <input id="chatText" maxlength="300" placeholder="Ketik pesan..." autocomplete="off">
+          <button id="chatSend" type="button" aria-label="Kirim">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 21.5 23 12 2.5 2.5v7.4L16 12 2.5 14.100z"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-settings" class="view hidden">
+      <div class="section-head"><h2>Pengaturan</h2></div>
+
+      <div class="set-card">
+        <h3>Profil</h3>
+        <div class="prof-preview">
+          <span class="ava big" id="setAva"></span>
+          <div><b id="setName"></b><small id="setBioPrev"></small></div>
+        </div>
+        <label>Avatar</label>
+        <div id="avaPicker" class="ava-picker"></div>
+        <label>Warna avatar</label>
+        <div id="colPicker" class="col-picker"></div>
+        <label>Status / bio</label>
+        <input id="setBio" class="set-in" maxlength="80" placeholder="Tulis status kamu..." autocomplete="off">
+        <button id="saveProfile" class="set-btn" type="button">Simpan profil</button>
+        <p id="setMsg" class="set-msg"></p>
+      </div>
+
+      <div class="set-card">
+        <h3>Latar belakang</h3>
+        <div id="bgPresets" class="bg-presets"></div>
+        <label>Warna kustom</label>
+        <div class="bg-colors">
+          <input type="color" id="bgC1" value="#7c5cff">
+          <input type="color" id="bgC2" value="#22d3ee">
+          <button id="bgApplyColors" class="set-btn small" type="button">Pakai</button>
+        </div>
+        <label>Gambar sendiri <small>(tersimpan di perangkat ini saja)</small></label>
+        <div class="bg-colors">
+          <label class="set-btn small file-btn">Pilih gambar<input type="file" id="bgFile" accept="image/*" hidden></label>
+          <button id="bgClearImg" class="set-btn small danger hidden" type="button">Hapus gambar</button>
+        </div>
+        <p id="bgMsg" class="set-msg"></p>
+      </div>
+
+      <div class="set-card">
+        <h3>Akun</h3>
+        <button id="logoutBtn" class="set-btn danger" type="button">Keluar</button>
+      </div>
+    </section>
   </main>
 
   <footer><p>Private collection · <span id="totalFoot"></span> game</p></footer>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <button type="button" class="bn-item active" data-view="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.500 12.500h5"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18.500" cy="14" r="1" fill="currentColor"/></svg>
+      <span>Game</span>
+    </button>
+    <button type="button" class="bn-item" data-view="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span>Riwayat</span>
+    </button>
+    <button type="button" class="bn-item" data-view="fav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.500-4.600-9.500-9.200C1.200 8.500 3 5 6.400 5c2 0 3.400 1.100 4.100 2.300h3C14.200 6.100 15.600 5 17.600 5 21 5 22.800 8.500 21.500 11.800 19.500 16.400 12 21 12 21z"/></svg>
+      <span>Favorit</span>
+    </button>
+    <button type="button" class="bn-item" data-view="chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.500 7.200L4 20l1-4.500A8 8 0 1 1 21 12z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button type="button" class="bn-item" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+      <span>Setelan</span>
+    </button>
+  </nav>
 </div>
 
 <script src="script.js"></script>
