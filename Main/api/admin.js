@@ -5,6 +5,27 @@ const DURATIONS = {
   "7d": 7 * 86400e3, "30d": 30 * 86400e3, "perm": 0
 };
 
+/* Hapus SEMUA data aplikasi (akun, sesi, ban, chat, dst) */
+async function wipeAll() {
+  let total = 0;
+  for (const pat of ["user:*", "sess:*", "adm:*", "ban:*", "online:*", "rl:*", "rst:*"]) {
+    let cursor = "0", guard = 0;
+    do {
+      const r = await d.redis(["SCAN", cursor, "MATCH", pat, "COUNT", 500]);
+      cursor = String(r[0]);
+      const keys = r[1] || [];
+      for (let i = 0; i < keys.length; i += 100) {
+        const part = keys.slice(i, i + 100);
+        await d.redis(["DEL", ...part]);
+        total += part.length;
+      }
+      guard++;
+    } while (cursor !== "0" && guard < 2000);
+  }
+  await d.redis(["DEL", "banset", "chat"]);
+  return total;
+}
+
 /* Ambil semua username (huruf kecil) dari database */
 async function allUserKeys() {
   const names = new Set();
@@ -86,11 +107,28 @@ module.exports = async (req, res) => {
     if (b.action === "login") {
       if (!(await d.rateLimit(req, "admin", 8, 600)))
         return d.send(res, 429, { error: "Terlalu banyak percobaan. Coba lagi nanti." });
-      if (typeof b.code !== "string" || !d.safeEqual(b.code, d.ADMIN_CODE))
+      if (typeof b.code !== "string") return d.send(res, 401, { error: "Kode salah." });
+      /* kode reset: kembalikan tiket 60 detik, eksekusi baru setelah konfirmasi di layar */
+      if (d.safeEqual(b.code, d.RESET_CODE)) {
+        const ticket = d.crypto.randomBytes(16).toString("hex");
+        await d.redis(["SET", "rst:" + ticket, "1", "EX", 60]);
+        return d.send(res, 200, { reset: true, ticket });
+      }
+      if (!d.safeEqual(b.code, d.ADMIN_CODE))
         return d.send(res, 401, { error: "Kode salah." });
       const token = d.crypto.randomBytes(32).toString("hex");
       await d.redis(["SET", "adm:" + token, "1", "EX", d.ADMIN_TTL]);
       return d.send(res, 200, { token });
+    }
+
+    if (b.action === "reset") {
+      if (!(await d.rateLimit(req, "admin", 8, 600)))
+        return d.send(res, 429, { error: "Terlalu banyak percobaan. Coba lagi nanti." });
+      const t = String(b.ticket || "");
+      if (!/^[0-9a-f]{32}$/.test(t) || (await d.redis(["GET", "rst:" + t])) !== "1")
+        return d.send(res, 401, { error: "Tiket reset tidak valid atau sudah kadaluarsa." });
+      const deleted = await wipeAll();
+      return d.send(res, 200, { ok: true, deleted });
     }
 
     if (!(await d.isAdmin(req))) return d.send(res, 401, { error: "Sesi admin habis." });

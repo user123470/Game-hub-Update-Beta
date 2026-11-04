@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "Skibidi123XD.Admin";
+const RESET_CODE = process.env.RESET_CODE || "Skibidi123XD.Reset";
 const SESSION_TTL = 60 * 60 * 24 * 30; // 30 hari
 const ADMIN_TTL = 60 * 60 * 2;         // 2 jam
 
@@ -56,6 +57,16 @@ function banInfo(ban) {
   };
 }
 
+function userState(user) {
+  return {
+    username: user.username,
+    history: user.history || [],
+    favorites: user.favorites || [],
+    profile: Object.assign({ avatar: "😎", color: "#7c6cff", bio: "" }, user.profile || {}),
+    bg: user.bg || { type: "preset", id: "aurora" }
+  };
+}
+
 function validUsername(u) { return typeof u === "string" && /^[A-Za-z0-9_]{3,16}$/.test(u); }
 function validPassword(p) { return typeof p === "string" && p.length >= 6 && p.length <= 64; }
 const lower = (u) => String(u).toLowerCase();
@@ -96,7 +107,7 @@ async function isAdmin(req) {
 }
 
 module.exports = {
-  ADMIN_CODE, SESSION_TTL, ADMIN_TTL, crypto, redis, send, body, bearer,
+  ADMIN_CODE, RESET_CODE, userState, SESSION_TTL, ADMIN_TTL, crypto, redis, send, body, bearer,
   rateLimit, validUsername, validPassword, lower, scrypt, safeEqual,
   getBan, banInfo, sessionUser, isAdmin
 };

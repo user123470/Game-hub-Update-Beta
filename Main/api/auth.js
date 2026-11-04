@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
 
       const token = d.crypto.randomBytes(32).toString("hex");
       await d.redis(["SET", "sess:" + token, d.lower(username), "EX", d.SESSION_TTL]);
-      return d.send(res, 200, { token, username, history: [] });
+      return d.send(res, 200, { token, ...d.userState(user) });
     }
 
     // login
@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
 
     const token = d.crypto.randomBytes(32).toString("hex");
     await d.redis(["SET", "sess:" + token, d.lower(username), "EX", d.SESSION_TTL]);
-    return d.send(res, 200, { token, username: user.username, history: user.history || [] });
+    return d.send(res, 200, { token, ...d.userState(user) });
   } catch (e) {
     const msg = e.message === "NO_DB"
       ? "Database belum disambungkan (lihat SETUP.md)."
