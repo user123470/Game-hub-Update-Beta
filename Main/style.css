@@ -1637,3 +1637,89 @@ button.user-chip:hover { border-color: var(--accent); }
 
 /* ikon cadangan dari favicon Google: jangan di-zoom */
 .card-thumb img.icon-fav { object-fit: contain; padding: 22%; box-sizing: border-box; }
+
+
+/* =====================================================================
+   MODE LITE + PANEL KODE (KEY) + TOMBOL MUAT LEBIH BANYAK
+   ===================================================================== */
+.more-btn {
+  display: block;
+  margin: 22px auto 0;
+  padding: 14px 26px;
+  font: 800 13px inherit;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: var(--shine);
+}
+.more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.switch-row { display: flex !important; align-items: center; justify-content: space-between; gap: 14px; margin: 0 !important; cursor: pointer; }
+.switch-row > span { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.switch-row b { font-size: 15px; letter-spacing: 0; color: var(--text); }
+.switch-row small { font-size: 12px; font-weight: 600; line-height: 1.45; letter-spacing: 0; color: var(--muted); }
+.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 30px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
+}
+.switch:checked { background: var(--grad); border-color: transparent; }
+.switch:checked::after { transform: translateX(22px); }
+
+.key-quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.key-quick button {
+  padding: 7px 11px;
+  font: 800 11px inherit;
+  font-family: inherit;
+  color: #fff;
+  background: #2a2a2d;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.key-quick button:hover { border-color: rgba(255,255,255,0.4); }
+.adm-in[type="datetime-local"] { color-scheme: dark; min-height: 40px; }
+
+/* ----- Mode Lite: tanpa animasi, tanpa blur, bayangan minimal ----- */
+body.lite::before { animation: none; filter: none; }
+body.lite *, body.lite *::before, body.lite *::after {
+  animation: none !important;
+  transition: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+body.lite .spinner { animation: spin 0.8s linear infinite !important; }
+body.lite .card, body.lite .set-card, body.lite .chips, body.lite .chat-wrap { box-shadow: none; }
+body.lite .card::after, body.lite .gate-card::before, body.lite .ban-card::before { display: none; }
+body.lite .card:hover { transform: none; box-shadow: none; }
+body.lite .card-thumb img { transform: none !important; }
+/* tanpa blur, permukaan kaca dibuat lebih pekat supaya tetap terbaca */
+body.lite .topbar, body.lite .bottom-nav, body.lite .player-bar,
+body.lite .gate-card, body.lite .ban-card { background: rgba(22,25,42,0.95); }
+body.lite .chips, body.lite .set-card, body.lite .chat-wrap { background: rgba(255,255,255,0.07); }
+body.lite .screen { background: rgba(7,9,18,0.82); }
+body.lite .player-loading, body.lite .player-fallback { background: rgba(7,9,18,0.92); }
