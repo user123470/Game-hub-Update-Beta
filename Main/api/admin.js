@@ -8,7 +8,7 @@ const DURATIONS = {
 /* Hapus SEMUA data aplikasi (akun, sesi, ban, chat, dst) */
 async function wipeAll() {
   let total = 0;
-  for (const pat of ["user:*", "sess:*", "adm:*", "ban:*", "online:*", "rl:*", "rst:*"]) {
+  for (const pat of ["user:*", "sess:*", "adm:*", "kadm:*", "ban:*", "key:*", "online:*", "rl:*", "rst:*"]) {
     let cursor = "0", guard = 0;
     do {
       const r = await d.redis(["SCAN", cursor, "MATCH", pat, "COUNT", 500]);
@@ -22,7 +22,7 @@ async function wipeAll() {
       guard++;
     } while (cursor !== "0" && guard < 2000);
   }
-  await d.redis(["DEL", "banset", "chat"]);
+  await d.redis(["DEL", "banset", "keyset", "chat"]);
   return total;
 }
 
@@ -114,11 +114,72 @@ module.exports = async (req, res) => {
         await d.redis(["SET", "rst:" + ticket, "1", "EX", 60]);
         return d.send(res, 200, { reset: true, ticket });
       }
-      if (!d.safeEqual(b.code, d.ADMIN_CODE))
+      /* kode GetKey: buka panel pembuat kode masuk */
+      if (d.safeEqual(b.code, d.GETKEY_CODE)) {
+        const ktoken = d.crypto.randomBytes(32).toString("hex");
+        await d.redis(["SET", "kadm:" + ktoken, "1", "EX", d.ADMIN_TTL]);
+        return d.send(res, 200, { getkey: true, ktoken });
+      }
+      if (!d.safeEqual(b.code, d.ADMIN_CODE)) {
+        /* bukan kode khusus -> mungkin kode masuk (key) yang dibuat lewat GetKey */
+        const kraw = b.code.length <= 40 ? await d.redis(["GET", "key:" + d.lower(b.code)]) : null;
+        if (kraw) {
+          let k; try { k = JSON.parse(kraw); } catch { k = null; }
+          if (k && k.until > Date.now()) return d.send(res, 200, { key: true, until: k.until, name: k.name });
+        }
         return d.send(res, 401, { error: "Kode salah." });
+      }
       const token = d.crypto.randomBytes(32).toString("hex");
       await d.redis(["SET", "adm:" + token, "1", "EX", d.ADMIN_TTL]);
       return d.send(res, 200, { token });
+    }
+
+    /* ---- panel GetKey (butuh token kadm) ---- */
+    if (typeof b.action === "string" && b.action.startsWith("keys_")) {
+      if (!(await d.isKeyAdmin(req))) return d.send(res, 401, { error: "Sesi panel kode habis." });
+
+      if (b.action === "keys_logout") {
+        await d.redis(["DEL", "kadm:" + d.bearer(req)]);
+        return d.send(res, 200, { ok: true });
+      }
+
+      if (b.action === "keys_list") {
+        const names = (await d.redis(["SMEMBERS", "keyset"])) || [];
+        const keys = [];
+        for (const n of names) {
+          const raw = await d.redis(["GET", "key:" + n]);
+          let k = null; try { k = raw ? JSON.parse(raw) : null; } catch {}
+          if (k && k.until > Date.now()) keys.push(k); else await d.redis(["SREM", "keyset", n]);
+        }
+        keys.sort((a, c) => a.until - c.until);
+        return d.send(res, 200, { keys });
+      }
+
+      if (b.action === "keys_add") {
+        const name = typeof b.name === "string" ? b.name.trim() : "";
+        if (!/^[A-Za-z0-9._-]{4,32}$/.test(name))
+          return d.send(res, 400, { error: "Nama kode 4-32 karakter: huruf, angka, titik, minus, underscore." });
+        const reserved = [d.ADMIN_CODE, d.RESET_CODE, d.GETKEY_CODE, "Skibidi123XD"].map(d.lower);
+        if (reserved.includes(d.lower(name)))
+          return d.send(res, 400, { error: "Nama kode ini dilarang." });
+        const until = Math.floor(Number(b.until));
+        const now = Date.now();
+        if (!(until > now + 60000)) return d.send(res, 400, { error: "Waktu berlaku harus di masa depan." });
+        if (until > now + 365 * 86400e3) return d.send(res, 400, { error: "Maksimal 1 tahun." });
+        const key = { name, until, created: now };
+        await d.redis(["SET", "key:" + d.lower(name), JSON.stringify(key), "PX", until - now + 60000]);
+        await d.redis(["SADD", "keyset", d.lower(name)]);
+        return d.send(res, 200, { ok: true, key });
+      }
+
+      if (b.action === "keys_del") {
+        const n = d.lower(String(b.name || ""));
+        await d.redis(["DEL", "key:" + n]);
+        await d.redis(["SREM", "keyset", n]);
+        return d.send(res, 200, { ok: true });
+      }
+
+      return d.send(res, 400, { error: "Aksi tidak valid." });
     }
 
     if (b.action === "reset") {

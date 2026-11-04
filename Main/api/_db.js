@@ -2,6 +2,7 @@ const crypto = require("crypto");
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "Skibidi123XD.Admin";
 const RESET_CODE = process.env.RESET_CODE || "Skibidi123XD.Reset";
+const GETKEY_CODE = process.env.GETKEY_CODE || "Skibidi123XD.GetKey";
 const SESSION_TTL = 60 * 60 * 24 * 30; // 30 hari
 const ADMIN_TTL = 60 * 60 * 2;         // 2 jam
 
@@ -100,6 +101,12 @@ async function sessionUser(req) {
   return name || null;
 }
 
+async function isKeyAdmin(req) {
+  const t = bearer(req);
+  if (!t) return false;
+  return (await redis(["GET", "kadm:" + t])) === "1";
+}
+
 async function isAdmin(req) {
   const t = bearer(req);
   if (!t) return false;
@@ -107,7 +114,7 @@ async function isAdmin(req) {
 }
 
 module.exports = {
-  ADMIN_CODE, RESET_CODE, userState, SESSION_TTL, ADMIN_TTL, crypto, redis, send, body, bearer,
+  ADMIN_CODE, RESET_CODE, GETKEY_CODE, isKeyAdmin, userState, SESSION_TTL, ADMIN_TTL, crypto, redis, send, body, bearer,
   rateLimit, validUsername, validPassword, lower, scrypt, safeEqual,
   getBan, banInfo, sessionUser, isAdmin
 };
