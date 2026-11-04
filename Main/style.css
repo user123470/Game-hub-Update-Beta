@@ -1633,3 +1633,7 @@ button.user-chip:hover { border-color: var(--accent); }
 @media (min-width: 701px) {
   .chat-box { height: 52vh; }
 }
+
+
+/* ikon cadangan dari favicon Google: jangan di-zoom */
+.card-thumb img.icon-fav { object-fit: contain; padding: 22%; box-sizing: border-box; }
