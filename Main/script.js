@@ -623,7 +623,10 @@ const games = [
   { name: "War Brokers jpw", slug: "jpw-war-brokers", url: JPW_GAME + "war-brokers" + "/", img: JPW_THUMB + "war-brokers" + ".webp", cat: "Shooter" },
   { name: "Gold Train FRVR jpw", slug: "jpw-gold-train-frvr", url: JPW_GAME + "gold-train-frvr" + "/", img: JPW_THUMB + "gold-train-frvr" + ".webp", cat: "Puzzle" },
   { name: "Mahjongg Dimensions jpw", slug: "jpw-mahjongg-dimensions", url: JPW_GAME + "mahjongg-dimensions" + "/", img: JPW_THUMB + "mahjongg-dimensions" + ".webp", cat: "Puzzle" },
-  { name: "shapez Demo jpw", slug: "jpw-shapez", url: JPW_GAME + "shapez" + "/", img: JPW_THUMB + "shapez" + ".webp", cat: "Strategy" }
+  { name: "shapez Demo jpw", slug: "jpw-shapez", url: JPW_GAME + "shapez" + "/", img: JPW_THUMB + "shapez" + ".webp", cat: "Strategy" },
+
+  /* ==================== TAMBAHAN KEVIN ==================== */
+  { name: "horsey game", slug: "horsey-game", url: "https://woahhcrackers.github.io/HorseyGameWeb/", cat: "PC" }
 ];
 
 /* =========================================================
@@ -1179,7 +1182,8 @@ if (!isPlayerPage) {
           <div class="card-cat" data-cat="${g.cat}">${g.cat}</div>
           <div class="initial">${init}</div>
           <img src="${g.img || (IMG_BASE + g.slug + ".webp")}" alt="" loading="lazy" referrerpolicy="no-referrer"
-               onload="this.classList.add('loaded')" onerror="this.remove()">
+               data-n="${escapeHtml(g.name)}" data-h="${escapeHtml(hostOf(g.url))}"
+               onload="this.classList.add('loaded')">
         </div>
         <div class="card-body">
           <div class="card-title">${escapeHtml(g.name)}</div>
@@ -1198,7 +1202,59 @@ if (!isPlayerPage) {
     </div>`;
   }
 
+  /* ---------- ikon cadangan: Steam -> favicon Google (lewat /api/icon) ---------- */
+  const iconMem = {};
+  let iconActive = 0;
+  const iconWait = [];
+
+  function iconRun(fn) {
+    return new Promise(res => {
+      const go = async () => {
+        iconActive++;
+        try { res(await fn()); }
+        finally { iconActive--; const nx = iconWait.shift(); if (nx) nx(); }
+      };
+      if (iconActive < 3) go(); else iconWait.push(go);
+    });
+  }
+
+  function hostOf(u) {
+    try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; }
+  }
+
+  function iconLookup(n, h) {
+    const k = n + "|" + h;
+    if (!iconMem[k]) {
+      iconMem[k] = iconRun(() =>
+        fetch("/api/icon?n=" + encodeURIComponent(n) + "&h=" + encodeURIComponent(h))
+          .then(r => r.json())
+          .catch(() => ({ src: null })));
+    }
+    return iconMem[k];
+  }
+
+  async function iconFallback(img) {
+    const step = Number(img.dataset.step || 0);
+    img.dataset.step = String(step + 1);
+    if (step === 0) {
+      const d = await iconLookup(img.dataset.n, img.dataset.h);
+      img.dataset.alt = d.alt || "";
+      if (d.src) {
+        img.classList.toggle("icon-fav", d.kind === "favicon");
+        img.src = d.src;
+        return;
+      }
+    } else if (step === 1 && img.dataset.alt) {
+      img.src = img.dataset.alt;
+      return;
+    }
+    img.remove();
+  }
+
   function bindCards(root) {
+    root.querySelectorAll(".card-thumb img").forEach(img => {
+      img.addEventListener("error", () => iconFallback(img));
+    });
     root.querySelectorAll(".card-open-tab").forEach(btn => {
       btn.onclick = (e) => {
         e.preventDefault();
