@@ -55,6 +55,46 @@
   </div>
 </div>
 
+<div id="keyScreen" class="adm-screen hidden">
+  <div class="adm-win">
+    <div class="adm-head">
+      <span>KEY PANEL</span>
+      <span class="adm-head-btns">
+        <button type="button" id="keyRefresh" title="Refresh">&#8634;</button>
+        <button type="button" id="keyClose" title="Tutup">X</button>
+      </span>
+    </div>
+    <div class="adm-cols">
+      <div class="adm-col">
+        <div class="adm-title">BUAT KODE</div>
+        <div class="adm-panel">
+          <label>NAMA KODE</label>
+          <input class="adm-in" id="keyName" placeholder="Kode untuk masuk.." autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="32">
+          <label>BERLAKU HINGGA</label>
+          <input class="adm-in" type="datetime-local" id="keyUntil">
+          <div class="key-quick">
+            <button type="button" data-off="3600000">+1 Jam</button>
+            <button type="button" data-off="86400000">+1 Hari</button>
+            <button type="button" data-off="604800000">+7 Hari</button>
+            <button type="button" data-off="2592000000">+30 Hari</button>
+          </div>
+          <button type="button" id="keyAdd" class="adm-ban">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.800 12.200 20 3m-3 0 3 3m-5 0 2 2"/></svg>
+            <span>BUAT KODE</span>
+          </button>
+          <p id="keyMsg" class="adm-msg"></p>
+        </div>
+      </div>
+      <div class="adm-col">
+        <div class="adm-title">KODE AKTIF</div>
+        <div class="adm-panel adm-list-panel">
+          <div id="keyList" class="adm-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="adminScreen" class="adm-screen hidden">
   <div class="adm-win">
     <div class="adm-head">
@@ -153,6 +193,7 @@
       <div class="meta"><span id="count">Memuat...</span></div>
       <div id="chips" class="chips"></div>
       <div id="grid" class="grid"></div>
+      <button id="moreBtn" class="more-btn hidden" type="button"></button>
       <div id="empty" class="empty hidden">
         <div class="empty-icon">🔍</div>
         <p>Tidak ada game yang cocok.</p>
@@ -214,6 +255,14 @@
         <input id="setBio" class="set-in" maxlength="80" placeholder="Tulis status kamu..." autocomplete="off">
         <button id="saveProfile" class="set-btn" type="button">Simpan profil</button>
         <p id="setMsg" class="set-msg"></p>
+      </div>
+
+      <div class="set-card">
+        <h3>Performa</h3>
+        <label class="switch-row" for="liteToggle">
+          <span><b>Mode ringan (Lite)</b><small>Hanya memuat game yang tampil (24 per halaman), mematikan animasi dan efek blur. Web jadi lebih ringan.</small></span>
+          <input type="checkbox" id="liteToggle" class="switch">
+        </label>
       </div>
 
       <div class="set-card">
