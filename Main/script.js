@@ -1405,4 +1405,499 @@ if (!isPlayerPage) {
     document.querySelectorAll("#colPicker button").forEach(b => b.classList.toggle("active", b.dataset.v === draftProfile.color));
   }
 
-  function renderBgPreset
+  function renderBgPresets() {
+    const box = document.getElementById("bgPresets");
+    box.innerHTML = Object.keys(BG_PRESETS).map(id => {
+      const c = BG_PRESETS[id];
+      const on = bgCache.type === "preset" && bgCache.id === id;
+      return `<button type="button" class="bg-chip ${on ? "active" : ""}" data-id="${id}" style="background:linear-gradient(135deg, rgb(${c[0]}), rgb(${c[1]}) 55%, rgb(${c[2]}))"><span>${BG_NAMES[id]}</span></button>`;
+    }).join("");
+    box.querySelectorAll(".bg-chip").forEach(b => {
+      b.onclick = () => saveBg({ type: "preset", id: b.dataset.id });
+    });
+    document.getElementById("bgClearImg").classList.toggle("hidden", !localStorage.getItem(LS_BGIMG));
+  }
+
+  function saveBg(bg) {
+    bgCache = bg;
+    applyBg(bg);
+    renderBgPresets();
+    api("me", { action: "bg", bg }, localStorage.getItem(LS_TOKEN));
+  }
+
+  function renderSettings() {
+    draftProfile = { ...profileCache };
+    document.getElementById("setBio").value = draftProfile.bio || "";
+    document.getElementById("avaPicker").innerHTML = AVATARS.map(a => `<button type="button" data-v="${a}">${a}</button>`).join("");
+    document.getElementById("colPicker").innerHTML = AVA_COLORS.map(c => `<button type="button" data-v="${c}" style="background:${c}"></button>`).join("");
+    document.querySelectorAll("#avaPicker button").forEach(b => b.onclick = () => { draftProfile.avatar = b.dataset.v; renderProfilePreview(); });
+    document.querySelectorAll("#colPicker button").forEach(b => b.onclick = () => { draftProfile.color = b.dataset.v; renderProfilePreview(); });
+    document.getElementById("setMsg").textContent = "";
+    if (bgCache.type === "colors") {
+      document.getElementById("bgC1").value = bgCache.c1;
+      document.getElementById("bgC2").value = bgCache.c2;
+    }
+    renderProfilePreview();
+    renderBgPresets();
+  }
+
+  async function saveProfile() {
+    const msg = document.getElementById("setMsg");
+    const btn = document.getElementById("saveProfile");
+    btn.disabled = true;
+    const r = await api("me", {
+      action: "profile",
+      avatar: draftProfile.avatar,
+      color: draftProfile.color,
+      bio: document.getElementById("setBio").value
+    }, localStorage.getItem(LS_TOKEN));
+    btn.disabled = false;
+    if (r.ok) {
+      profileCache = r.data.profile;
+      renderTopUser();
+      msg.classList.add("ok");
+      msg.textContent = "Profil tersimpan.";
+    } else {
+      msg.classList.remove("ok");
+      msg.textContent = r.data.error || "Gagal menyimpan.";
+    }
+  }
+
+  function readBgFile(file) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onerror = () => reject(new Error("Gagal membaca file."));
+      fr.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("File bukan gambar."));
+        img.onload = () => {
+          const max = 1280;
+          const k = Math.min(1, max / Math.max(img.width, img.height));
+          const c = document.createElement("canvas");
+          c.width = Math.round(img.width * k);
+          c.height = Math.round(img.height * k);
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL("image/jpeg", 0.72));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function initSettings() {
+    document.getElementById("saveProfile").onclick = saveProfile;
+    document.getElementById("liteToggle").checked = isLite();
+    document.getElementById("liteToggle").onchange = (e) => setLite(e.target.checked);
+    document.getElementById("moreBtn").onclick = loadMore;
+    document.getElementById("setBio").addEventListener("input", renderProfilePreview);
+    document.getElementById("bgApplyColors").onclick = () => saveBg({
+      type: "colors",
+      c1: document.getElementById("bgC1").value,
+      c2: document.getElementById("bgC2").value
+    });
+    document.getElementById("bgFile").onchange = async (e) => {
+      const f = e.target.files[0];
+      e.target.value = "";
+      if (!f) return;
+      const msg = document.getElementById("bgMsg");
+      try {
+        const data = await readBgFile(f);
+        localStorage.setItem(LS_BGIMG, data);
+        msg.textContent = "";
+        saveBg({ type: "local" });
+      } catch (err) {
+        msg.textContent = err.name === "QuotaExceededError" ? "Gambar terlalu besar untuk disimpan." : (err.message || "Gagal.");
+      }
+    };
+    document.getElementById("bgClearImg").onclick = () => {
+      localStorage.removeItem(LS_BGIMG);
+      saveBg({ type: "preset", id: "aurora" });
+    };
+    document.getElementById("userChip").onclick = () => setView("settings");
+  }
+
+  /* ---------- chat global (pesan hilang setelah 1 jam) ---------- */
+  const CHAT_TTL = 60 * 60 * 1000;
+  let chatMsgs = [], chatSince = 0, chatTimer = null, chatBusy = false;
+
+  function hhmm(ts) { return new Date(ts).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }); }
+
+  function renderChat(forceBottom) {
+    const box = document.getElementById("chatBox");
+    const me = document.getElementById("userName").textContent.toLowerCase();
+    const stick = forceBottom || box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    const cutoff = Date.now() - CHAT_TTL;
+    chatMsgs = chatMsgs.filter(m => m.ts > cutoff);
+    box.innerHTML = chatMsgs.length
+      ? chatMsgs.map(m => {
+          const col = /^#[0-9a-fA-F]{6}$/.test(m.c) ? m.c : "#7c6cff";
+          return `<div class="msg ${String(m.u).toLowerCase() === me ? "mine" : ""}">
+            <span class="ava sm" style="background:${col}">${escapeHtml(m.a || "😎")}</span>
+            <div class="bubble">
+              <div class="msg-head"><b>${escapeHtml(m.u)}</b><small>${hhmm(m.ts)}</small></div>
+              <div class="msg-text">${escapeHtml(m.t)}</div>
+            </div>
+          </div>`;
+        }).join("")
+      : '<div class="chat-empty">Belum ada pesan. Sapa yang lain! 👋</div>';
+    if (stick) box.scrollTop = box.scrollHeight;
+  }
+
+  function chatKicked(r) {
+    if (r.status === 401 || r.data.banned) {
+      if (r.data.banned) saveBan(r.data);
+      localStorage.removeItem(LS_TOKEN);
+      location.reload();
+      return true;
+    }
+    return false;
+  }
+
+  async function pollChat() {
+    if (chatBusy) return;
+    chatBusy = true;
+    const r = await api("chat", { action: "poll", since: Math.max(0, chatSince - 1) }, localStorage.getItem(LS_TOKEN));
+    chatBusy = false;
+    if (chatKicked(r) || !r.ok) return;
+    const known = new Set(chatMsgs.map(m => m.id));
+    r.data.messages.forEach(m => {
+      if (!known.has(m.id)) chatMsgs.push(m);
+      if (m.ts > chatSince) chatSince = m.ts;
+    });
+    chatMsgs = chatMsgs.filter(m => m.ts > r.data.cutoff);
+    renderChat();
+  }
+
+  function startChat() {
+    if (chatTimer) return;
+    renderChat(true);
+    pollChat();
+    chatTimer = setInterval(pollChat, isLite() ? 6000 : 3000);
+  }
+
+  function stopChat() {
+    clearInterval(chatTimer);
+    chatTimer = null;
+  }
+
+  async function sendChat() {
+    const inp = document.getElementById("chatText");
+    const btn = document.getElementById("chatSend");
+    const err = document.getElementById("chatErr");
+    const text = inp.value.trim();
+    if (!text) return;
+    inp.value = "";
+    err.textContent = "";
+    btn.disabled = true;
+    const r = await api("chat", { action: "send", text }, localStorage.getItem(LS_TOKEN));
+    btn.disabled = false;
+    if (chatKicked(r)) return;
+    if (r.ok) {
+      if (!chatMsgs.some(m => m.id === r.data.msg.id)) chatMsgs.push(r.data.msg);
+      if (r.data.msg.ts > chatSince) chatSince = r.data.msg.ts;
+      renderChat(true);
+    } else {
+      inp.value = text;
+      err.textContent = r.data.error || "Gagal mengirim.";
+    }
+  }
+
+  function initChat() {
+    document.getElementById("chatSend").onclick = sendChat;
+    document.getElementById("chatText").addEventListener("keydown", e => { if (e.key === "Enter") sendChat(); });
+  }
+
+  function initNav() {
+    document.querySelectorAll(".bn-item").forEach(b => { b.onclick = () => setView(b.dataset.view); });
+  }
+
+  /* ---------- panel GetKey: buat kode masuk berbatas waktu ---------- */
+  let keyToken = "";
+  let keyListData = [];
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  function toLocalInput(ms) {
+    const d = new Date(ms);
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()) + "T" + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+
+  function keyMsg(t, ok) {
+    const el = document.getElementById("keyMsg");
+    el.textContent = t || "";
+    el.classList.toggle("ok", !!ok);
+  }
+
+  function openKeys(token) {
+    keyToken = token;
+    hide("gate"); hide("authScreen"); hide("app"); hide("adminScreen");
+    show("keyScreen");
+    keyMsg("");
+    document.getElementById("keyUntil").value = toLocalInput(Date.now() + 86400000);
+    loadKeys();
+  }
+
+  async function closeKeys() {
+    const t = keyToken;
+    keyToken = "";
+    hide("keyScreen");
+    show("gate");
+    document.getElementById("gatePw").value = "";
+    document.getElementById("gateErr").textContent = "";
+    if (t) await api("admin", { action: "keys_logout" }, t);
+  }
+
+  async function loadKeys() {
+    const r = await api("admin", { action: "keys_list" }, keyToken);
+    if (r.status === 401) { closeKeys(); return; }
+    if (!r.ok) { keyMsg(r.data.error || "Gagal memuat."); return; }
+    keyListData = r.data.keys || [];
+    renderKeys();
+  }
+
+  function renderKeys() {
+    const box = document.getElementById("keyList");
+    if (!keyListData.length) { box.innerHTML = '<div class="adm-empty">Belum ada kode aktif.</div>'; return; }
+    box.innerHTML = keyListData.map(k => `<div class="adm-row">
+      <div class="adm-ava">&#128273;</div>
+      <div class="adm-info">
+        <b>${escapeHtml(k.name)}</b>
+        <small>Hingga ${escapeHtml(new Date(k.until).toLocaleString("id-ID"))} · sisa ${escapeHtml(fmtLeft(k.until))}</small>
+      </div>
+      <button type="button" class="adm-unban" data-k="${escapeHtml(k.name)}" title="Hapus">&#8212;</button>
+    </div>`).join("");
+    box.querySelectorAll(".adm-unban").forEach(btn => {
+      btn.onclick = async () => {
+        const r = await api("admin", { action: "keys_del", name: btn.dataset.k }, keyToken);
+        if (r.ok) { keyMsg("Kode " + btn.dataset.k + " dihapus.", true); loadKeys(); }
+        else keyMsg(r.data.error || "Gagal menghapus.");
+      };
+    });
+  }
+
+  async function addKey() {
+    const name = document.getElementById("keyName").value.trim();
+    const until = new Date(document.getElementById("keyUntil").value).getTime();
+    if (!name) { keyMsg("Isi nama kode dulu."); return; }
+    if (!until) { keyMsg("Pilih waktu berlaku."); return; }
+    const btn = document.getElementById("keyAdd");
+    btn.disabled = true;
+    const r = await api("admin", { action: "keys_add", name, until }, keyToken);
+    btn.disabled = false;
+    if (r.status === 401) { closeKeys(); return; }
+    if (r.ok) {
+      keyMsg("Kode " + name + " aktif sampai " + new Date(until).toLocaleString("id-ID") + ".", true);
+      document.getElementById("keyName").value = "";
+      loadKeys();
+    } else keyMsg(r.data.error || "Gagal membuat kode.");
+  }
+
+  function initKeyUi() {
+    document.getElementById("keyAdd").onclick = addKey;
+    document.getElementById("keyRefresh").onclick = loadKeys;
+    document.getElementById("keyClose").onclick = closeKeys;
+    document.getElementById("keyName").addEventListener("keydown", e => { if (e.key === "Enter") addKey(); });
+    document.querySelectorAll(".key-quick button").forEach(b => {
+      b.onclick = () => { document.getElementById("keyUntil").value = toLocalInput(Date.now() + Number(b.dataset.off)); };
+    });
+    /* kode masuk (key) yang habis saat sedang dipakai -> kembali ke gate */
+    setInterval(() => { if (keyExpired()) location.reload(); }, 30000);
+  }
+
+  /* ---------- reset total (kode rahasia) ---------- */
+  async function doReset(ticket) {
+    if (!confirm("⚠️ RESET TOTAL\n\nSemua akun, riwayat, favorit, chat, dan data ban akan DIHAPUS PERMANEN dari database.\n\nLanjutkan?")) return;
+    if (!confirm("Yakin 100%? Ini tidak bisa dibatalkan.")) return;
+    const r = await api("admin", { action: "reset", ticket });
+    if (r.ok) {
+      [LS_TOKEN, LS_BAN, LS_BG, LS_BGIMG, LS_AUTH].forEach(k => localStorage.removeItem(k));
+      alert("Selesai. Semua data & akun sudah dihapus.");
+      location.reload();
+    } else {
+      document.getElementById("gateErr").textContent = r.data.error || "Reset gagal.";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("gateBtn").onclick = tryGate;
+    document.getElementById("gatePw").addEventListener("keydown", e => {
+      if (e.key === "Enter") tryGate();
+    });
+
+    document.getElementById("clearHistoryBtn").onclick = () => {
+      if (confirm("Hapus semua riwayat?")) {
+        historyCache = [];
+        api("me", { action: "clear" }, localStorage.getItem(LS_TOKEN));
+        renderHistory();
+      }
+    };
+
+    let timer;
+    document.getElementById("search").addEventListener("input", e => {
+      currentQuery = e.target.value;
+      clearTimeout(timer);
+      timer = setTimeout(renderGrid, 80);
+    });
+
+    document.getElementById("totalFoot").textContent = games.length;
+
+    initAuthUi();
+    initNav();
+    initKeyUi();
+    initSettings();
+    initChat();
+
+    if (isAuthed()) {
+      touchAuth();
+      afterGate();
+    }
+
+    ["click", "keydown", "touchstart"].forEach(evt => {
+      document.addEventListener(evt, () => { if (isAuthed()) touchAuth(); }, { passive: true });
+    });
+  });
+}
+
+/* =========================================================
+   HALAMAN PLAYER
+   ========================================================= */
+if (isPlayerPage) {
+  document.addEventListener("DOMContentLoaded", async () => {
+    if (!isAuthed()) {
+      location.href = "index.html";
+      return;
+    }
+
+    const me = await api("me", { action: "get" }, localStorage.getItem(LS_TOKEN));
+    if (!me.ok) {
+      if (me.data.banned) saveBan(me.data);
+      if (me.status === 401 || me.data.banned) localStorage.removeItem(LS_TOKEN);
+      location.href = "index.html";
+      return;
+    }
+
+    applyMe(me.data);
+
+    const params = new URLSearchParams(location.search);
+    const slug = params.get("slug");
+    const game = games.find(g => g.slug === slug);
+
+    if (!game) {
+      document.getElementById("playerTitle").textContent = "Game tidak ditemukan";
+      document.getElementById("loading").innerHTML = "<p>Game tidak ditemukan.</p>";
+      return;
+    }
+
+    document.title = game.name + " — Playlume";
+    document.getElementById("playerTitle").textContent = game.name;
+    document.getElementById("openNewTab").href = game.url;
+    document.getElementById("fallbackBtn").href = game.url;
+
+    addHistory(slug);
+
+    const frame = document.getElementById("gameFrame");
+    const loading = document.getElementById("loading");
+    const fallback = document.getElementById("fallback");
+
+    let loaded = false;
+    let fallbackShown = false;
+
+    function showFallback() {
+      if (fallbackShown) return;
+      fallbackShown = true;
+      loading.classList.add("hidden");
+      frame.classList.add("hidden");
+      frame.src = "about:blank";
+      fallback.classList.remove("hidden");
+    }
+
+    if (!canEmbed(game.url)) {
+      showFallback();
+    } else {
+      frame.setAttribute("referrerpolicy", "no-referrer");
+      frame.addEventListener("load", () => {
+        if (fallbackShown) return;
+        loaded = true;
+        loading.classList.add("hidden");
+        frame.classList.remove("hidden");
+      });
+      frame.addEventListener("error", showFallback);
+      frame.src = game.url;
+
+      setTimeout(() => { if (!loaded) showFallback(); }, 8000);
+    }
+
+    document.getElementById("backBtn").addEventListener("click", e => {
+      e.preventDefault();
+      location.href = "index.html";
+    });
+
+    const fsBtn = document.getElementById("fullscreenBtn");
+    const fsIcon = document.getElementById("fsIcon");
+    const body = document.body;
+
+    const iconExpand = `<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>`;
+    const iconShrink = `<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>`;
+
+    function isFullscreen() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    function updateFsIcon() {
+      fsIcon.innerHTML = isFullscreen() ? iconShrink : iconExpand;
+    }
+
+    async function toggleFullscreen() {
+      try {
+        if (!isFullscreen()) {
+          if (frame.requestFullscreen || frame.webkitRequestFullscreen) {
+            try {
+              await (frame.requestFullscreen ? frame.requestFullscreen() : Promise.resolve(frame.webkitRequestFullscreen()));
+              updateFsIcon();
+              return;
+            } catch (e) {}
+          }
+          if (body.requestFullscreen) await body.requestFullscreen();
+          else if (body.webkitRequestFullscreen) body.webkitRequestFullscreen();
+          else if (body.msRequestFullscreen) body.msRequestFullscreen();
+        } else {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          else if (document.msExitFullscreen) document.msExitFullscreen();
+        }
+        updateFsIcon();
+      } catch (err) {
+        console.warn("Fullscreen gagal:", err);
+      }
+    }
+
+    fsBtn.addEventListener("click", toggleFullscreen);
+
+    ["fullscreenchange", "webkitfullscreenchange"].forEach(evt => {
+      document.addEventListener(evt, updateFsIcon);
+    });
+
+    document.addEventListener("keydown", e => {
+      if ((e.key === "f" || e.key === "F") && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+        toggleFullscreen();
+      }
+    });
+  });
+   }
+
+/* =========================================================
+   HEARTBEAT: tandai player online + tendang kalau kena ban
+   ========================================================= */
+setInterval(async () => {
+  const token = localStorage.getItem(LS_TOKEN);
+  if (!token) return;
+  const appEl = document.getElementById("app");
+  const inApp = isPlayerPage || (appEl && !appEl.classList.contains("hidden"));
+  if (!inApp) return;
+  const r = await api("me", { action: "ping" }, token);
+  if (r.status === 401 || r.data.banned) {
+    if (r.data.banned) saveBan(r.data);
+    localStorage.removeItem(LS_TOKEN);
+    location.reload();
+  }
+}, 40000);
