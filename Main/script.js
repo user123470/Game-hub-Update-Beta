@@ -1,6 +1,4 @@
-/* =========================================================
-   KONFIGURASI
-   ========================================================= */
+// Konfigurasi
 const PASSWORD = "Skibidi123XD";
 const IMG_BASE = "https://radiantoptimizer.app/product/games/";
 const JPW_THUMB = "https://justplayweb.com/thumbs/";
@@ -35,9 +33,7 @@ const CATEGORIES = [
   "Racing", "Sports", "Adventure"
 ];
 
-/* =========================================================
-   DAFTAR GAME
-   ========================================================= */
+// Daftar game. Tiap baris diakhiri koma, kecuali yang terakhir.
 const games = [
   /* ==================== PC (42) ==================== */
   { name: "Need For Speed Underground 2", slug: "Need-For-Speed-Underground-2", url: "https://nfsu2.xyz", cat: "PC" },
@@ -626,9 +622,6 @@ const games = [
   { name: "shapez Demo jpw", slug: "jpw-shapez", url: JPW_GAME + "shapez" + "/", img: JPW_THUMB + "shapez" + ".webp", cat: "Strategy" },
 ];
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -706,18 +699,19 @@ const LS_BGIMG = "gh_bgimg";
 
 let favCache = [];
 let profileCache = { avatar: "😎", color: "#7c6cff", bio: "" };
-let bgCache = { type: "preset", id: "aurora" };
+const DEFAULT_BG = { type: "preset", id: "lume" };
+let bgCache = DEFAULT_BG;
 
+/* empat bercak warna (R,G,B) di balik kaca; dipilih agar tidak saling bertabrakan */
 const BG_PRESETS = {
-  aurora:   ["124,92,255", "34,211,238", "255,92,168", "59,130,246"],
-  sunset:   ["255,120,70", "255,70,130", "255,190,80", "170,70,255"],
-  ocean:    ["20,120,255", "0,220,220", "60,90,255", "0,160,200"],
-  forest:   ["40,200,120", "20,150,110", "140,220,60", "0,120,100"],
-  midnight: ["70,70,170", "30,50,120", "110,70,190", "25,35,90"],
-  rose:     ["255,90,140", "255,150,190", "190,70,200", "255,110,110"],
-  mono:     ["130,130,140", "80,80,90", "170,170,180", "60,60,70"]
+  lume:  ["46,160,120", "88,86,214", "222,122,72", "30,110,150"],
+  fajar: ["230,120,70", "200,70,110", "240,180,80", "120,70,170"],
+  laut:  ["20,130,170", "30,90,190", "40,170,160", "70,70,160"],
+  hutan: ["50,150,90", "120,170,50", "30,110,100", "90,120,60"],
+  malam: ["70,70,190", "120,70,180", "40,60,140", "30,90,150"],
+  arang: ["110,115,120", "70,75,85", "140,130,120", "55,60,70"]
 };
-const BG_NAMES = { aurora: "Aurora", sunset: "Sunset", ocean: "Ocean", forest: "Forest", midnight: "Midnight", rose: "Rose", mono: "Mono" };
+const BG_NAMES = { lume: "Lume", fajar: "Fajar", laut: "Laut", hutan: "Hutan", malam: "Malam", arang: "Arang" };
 
 function hexToRgb(h) {
   const n = parseInt(h.slice(1), 16);
@@ -725,19 +719,22 @@ function hexToRgb(h) {
 }
 
 function applyBg(bg) {
-  bg = bg || { type: "preset", id: "aurora" };
-  let cols = BG_PRESETS.aurora;
-  document.body.classList.remove("has-bg-image");
-  if (bg.type === "preset" && BG_PRESETS[bg.id]) cols = BG_PRESETS[bg.id];
-  else if (bg.type === "colors") { const a = hexToRgb(bg.c1), b = hexToRgb(bg.c2); cols = [a, b, b, a]; }
+  bg = bg || DEFAULT_BG;
+  const body = document.body;
+  let orbs = BG_PRESETS.lume;
+  body.classList.remove("has-bg-image");
+
+  if (bg.type === "preset" && BG_PRESETS[bg.id]) orbs = BG_PRESETS[bg.id];
+  else if (bg.type === "colors") { const a = hexToRgb(bg.c1), b = hexToRgb(bg.c2); orbs = [a, b, a, b]; }
   else if (bg.type === "local") {
     const img = localStorage.getItem(LS_BGIMG);
     if (img) {
-      document.body.style.setProperty("--bg-image", 'url("' + img + '")');
-      document.body.classList.add("has-bg-image");
+      body.style.setProperty("--bg-image", 'url("' + img + '")');
+      body.classList.add("has-bg-image");
     }
   }
-  cols.forEach((c, i) => document.documentElement.style.setProperty("--o" + (i + 1), c));
+
+  orbs.forEach((c, i) => document.documentElement.style.setProperty("--o" + (i + 1), c));
   try { localStorage.setItem(LS_BG, JSON.stringify(bg)); } catch {}
 }
 
@@ -754,9 +751,7 @@ applyBg(bgCache);
 
 const isPlayerPage = document.body.classList.contains("player-body");
 
-/* =========================================================
-   HALAMAN INDEX
-   ========================================================= */
+// Halaman daftar game
 if (!isPlayerPage) {
   let currentCat = "All";
   let currentQuery = "";
@@ -876,8 +871,10 @@ if (!isPlayerPage) {
     authMode = m;
     document.getElementById("tabLogin").classList.toggle("active", m === "login");
     document.getElementById("tabReg").classList.toggle("active", m === "register");
-    document.getElementById("authPw2").classList.toggle("hidden", m !== "register");
-    document.getElementById("authBtn").textContent = m === "login" ? "MASUK" : "DAFTAR";
+    document.getElementById("tabLogin").setAttribute("aria-pressed", String(m === "login"));
+    document.getElementById("tabReg").setAttribute("aria-pressed", String(m === "register"));
+    document.getElementById("authPw2Wrap").classList.toggle("hidden", m !== "register");
+    document.getElementById("authBtn").textContent = m === "login" ? "Masuk" : "Daftar";
     document.getElementById("authPw").autocomplete = m === "login" ? "current-password" : "new-password";
     document.getElementById("authErr").textContent = "";
   }
@@ -1162,7 +1159,7 @@ if (!isPlayerPage) {
     const counts = {};
     CATEGORIES.forEach(c => counts[c] = games.filter(g => g.cat === c).length);
 
-    let html = `<button class="chip ${currentCat === "All" ? "active" : ""}" data-cat="All">All <span class="cnt">${total}</span></button>`;
+    let html = `<button class="chip ${currentCat === "All" ? "active" : ""}" data-cat="All">Semua <span class="cnt">${total}</span></button>`;
 
     CATEGORIES.forEach(c => {
       if (counts[c] > 0) {
@@ -1187,7 +1184,11 @@ if (!isPlayerPage) {
   function setView(v) {
     currentView = v;
     VIEWS.forEach(n => document.getElementById("view-" + n).classList.toggle("hidden", n !== v));
-    document.querySelectorAll(".bn-item").forEach(b => b.classList.toggle("active", b.dataset.view === v));
+    document.querySelectorAll(".bn-item").forEach(b => {
+      const on = b.dataset.view === v;
+      b.classList.toggle("active", on);
+      if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
     document.querySelector(".search-wrap").classList.toggle("hidden", v !== "home");
     if (v === "history") renderHistory();
     if (v === "fav") renderFav();
@@ -1197,32 +1198,32 @@ if (!isPlayerPage) {
   }
 
   /* ---------- kartu game (dipakai di semua daftar) ---------- */
-  function cardHtml(g) {
+  function cardHtml(g, i) {
     const init = g.name.trim().charAt(0).toUpperCase();
+    const loading = i === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
     const fav = favCache.includes(g.slug);
+    const name = escapeHtml(g.name);
     return `<div class="card">
       <a href="play.html?slug=${encodeURIComponent(g.slug)}" class="card-link">
         <div class="card-thumb">
-          <div class="card-cat" data-cat="${g.cat}">${g.cat}</div>
-          <div class="initial">${init}</div>
-          <img src="${g.img || (IMG_BASE + g.slug + ".webp")}" alt="" loading="lazy" referrerpolicy="no-referrer"
-               data-n="${escapeHtml(g.name)}" data-h="${escapeHtml(hostOf(g.url))}"
+          <span class="initial">${escapeHtml(init)}</span>
+          <img src="${g.img || (IMG_BASE + g.slug + ".webp")}" alt="" width="320" height="240" ${loading} referrerpolicy="no-referrer"
+               data-n="${name}" data-h="${escapeHtml(hostOf(g.url))}"
                onload="this.classList.add('loaded')">
         </div>
         <div class="card-body">
-          <div class="card-title">${escapeHtml(g.name)}</div>
+          <div class="card-title">${name}</div>
         </div>
       </a>
-      <button class="card-fav ${fav ? "on" : ""}" data-slug="${escapeHtml(g.slug)}" title="Favorit" aria-label="Favorit">
-        <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.5 3 5 6.4 5c2 0 3.4 1.1 4.1 2.3h3C14.2 6.1 15.6 5 17.6 5 21 5 22.8 8.5 21.5 11.8 19.5 16.400 12 21 12 21z"/></svg>
-      </button>
-      <button class="card-open-tab" data-url="${escapeHtml(g.url)}" title="Buka di Tab Baru">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/>
-          <line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
-      </button>
+      <div class="card-tools">
+        <span class="card-cat">${escapeHtml(g.cat)}</span>
+        <button type="button" class="card-open-tab" data-url="${escapeHtml(g.url)}" aria-label="Buka ${name} di tab baru">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5H5.500A1.500 1.500 0 0 0 4 6.500v12A1.500 1.500 0 0 0 5.500 20h12a1.500 1.500 0 0 0 1.500-1.500V14"/><path d="M14 4h6v6"/><path d="M20 4 11 13"/></svg>
+        </button>
+        <button type="button" class="card-fav ${fav ? "on" : ""}" data-slug="${escapeHtml(g.slug)}" aria-pressed="${fav}" aria-label="Favorit: ${name}">
+          <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.500C5.500 16 3 12.800 3 9.500A4.500 4.500 0 0 1 7.500 5C9.500 5 11.200 6 12 7.500 12.800 6 14.500 5 16.500 5A4.500 4.500 0 0 1 21 9.500c0 3.300-2.500 6.500-9 11Z"/></svg>
+        </button>
+      </div>
     </div>`;
   }
 
@@ -1299,7 +1300,10 @@ if (!isPlayerPage) {
     const on = !favCache.includes(slug);
     favCache = on ? [slug, ...favCache] : favCache.filter(x => x !== slug);
     document.querySelectorAll(".card-fav").forEach(b => {
-      if (b.dataset.slug === slug) b.classList.toggle("on", on);
+      if (b.dataset.slug === slug) {
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+      }
     });
     api("me", { action: "fav", slug, on }, localStorage.getItem(LS_TOKEN));
     if (currentView === "fav") renderFav();
@@ -1362,7 +1366,7 @@ if (!isPlayerPage) {
 
     if (append && lite) {
       const tmp = document.createElement("div");
-      tmp.innerHTML = list.slice(liteShown - LITE_PAGE, shown).map(cardHtml).join("");
+      tmp.innerHTML = list.slice(liteShown - LITE_PAGE, shown).map(g => cardHtml(g, 1)).join("");
       bindCards(tmp);
       while (tmp.firstChild) grid.appendChild(tmp.firstChild);
     } else {
@@ -1410,7 +1414,8 @@ if (!isPlayerPage) {
     box.innerHTML = Object.keys(BG_PRESETS).map(id => {
       const c = BG_PRESETS[id];
       const on = bgCache.type === "preset" && bgCache.id === id;
-      return `<button type="button" class="bg-chip ${on ? "active" : ""}" data-id="${id}" style="background:linear-gradient(135deg, rgb(${c[0]}), rgb(${c[1]}) 55%, rgb(${c[2]}))"><span>${BG_NAMES[id]}</span></button>`;
+      const swatch = `radial-gradient(60% 80% at 15% 15%, rgb(${c[0]}), transparent), radial-gradient(60% 80% at 90% 30%, rgb(${c[1]}), transparent), radial-gradient(60% 80% at 60% 100%, rgb(${c[2]}), transparent), #0b100f`;
+      return `<button type="button" class="bg-chip ${on ? "active" : ""}" data-id="${id}" aria-pressed="${on}" style="background:${swatch}">${BG_NAMES[id]}</button>`;
     }).join("");
     box.querySelectorAll(".bg-chip").forEach(b => {
       b.onclick = () => saveBg({ type: "preset", id: b.dataset.id });
@@ -1519,7 +1524,7 @@ if (!isPlayerPage) {
 
   /* ---------- chat global (pesan hilang setelah 1 jam) ---------- */
   const CHAT_TTL = 60 * 60 * 1000;
-  let chatMsgs = [], chatSince = 0, chatTimer = null, chatBusy = false;
+  let chatMsgs = [], chatSince = 0, chatTimer = null, chatBusy = false, chatLoaded = false;
 
   function hhmm(ts) { return new Date(ts).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }); }
 
@@ -1540,7 +1545,7 @@ if (!isPlayerPage) {
             </div>
           </div>`;
         }).join("")
-      : '<div class="chat-empty">Belum ada pesan. Sapa yang lain! 👋</div>';
+      : `<p class="chat-empty">${chatLoaded ? "Belum ada pesan" : "Memuat pesan..."}</p>`;
     if (stick) box.scrollTop = box.scrollHeight;
   }
 
@@ -1559,7 +1564,13 @@ if (!isPlayerPage) {
     chatBusy = true;
     const r = await api("chat", { action: "poll", since: Math.max(0, chatSince - 1) }, localStorage.getItem(LS_TOKEN));
     chatBusy = false;
-    if (chatKicked(r) || !r.ok) return;
+    if (chatKicked(r)) return;
+    if (!r.ok) {
+      document.getElementById("chatErr").textContent = r.data.error || "Chat tidak bisa dimuat. Mencoba lagi.";
+      return;
+    }
+    document.getElementById("chatErr").textContent = "";
+    chatLoaded = true;
     const known = new Set(chatMsgs.map(m => m.id));
     r.data.messages.forEach(m => {
       if (!known.has(m.id)) chatMsgs.push(m);
@@ -1706,7 +1717,7 @@ if (!isPlayerPage) {
 
   /* ---------- reset total (kode rahasia) ---------- */
   async function doReset(ticket) {
-    if (!confirm("⚠️ RESET TOTAL\n\nSemua akun, riwayat, favorit, chat, dan data ban akan DIHAPUS PERMANEN dari database.\n\nLanjutkan?")) return;
+    if (!confirm("Reset total\n\nSemua akun, riwayat, favorit, chat, dan data ban akan dihapus permanen dari database.\n\nLanjutkan?")) return;
     if (!confirm("Yakin 100%? Ini tidak bisa dibatalkan.")) return;
     const r = await api("admin", { action: "reset", ticket });
     if (r.ok) {
@@ -1758,9 +1769,7 @@ if (!isPlayerPage) {
   });
 }
 
-/* =========================================================
-   HALAMAN PLAYER
-   ========================================================= */
+// Halaman player
 if (isPlayerPage) {
   document.addEventListener("DOMContentLoaded", async () => {
     if (!isAuthed()) {
@@ -1788,7 +1797,7 @@ if (isPlayerPage) {
       return;
     }
 
-    document.title = game.name + " — Playlume";
+    document.title = game.name + " | Playlume";
     document.getElementById("playerTitle").textContent = game.name;
     document.getElementById("openNewTab").href = game.url;
     document.getElementById("fallbackBtn").href = game.url;
@@ -1885,9 +1894,7 @@ if (isPlayerPage) {
   });
    }
 
-/* =========================================================
-   HEARTBEAT: tandai player online + tendang kalau kena ban
-   ========================================================= */
+// Tandai player online dan keluarkan kalau akunnya diban
 setInterval(async () => {
   const token = localStorage.getItem(LS_TOKEN);
   if (!token) return;
