@@ -2,61 +2,57 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memuat game...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memuat game | Playlume</title>
+<meta name="theme-color" content="#efe7d6">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
-<meta name="theme-color" content="#070912">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="player-body">
 
-<div class="player-bar">
-  <a href="index.html" class="player-btn" id="backBtn">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+<header class="player-bar">
+  <a href="index.html" class="player-btn" id="backBtn" aria-label="Kembali ke daftar game">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
     <span>Kembali</span>
   </a>
 
-  <div class="player-title" id="playerTitle">Memuat...</div>
+  <h1 class="player-title" id="playerTitle">Memuat...</h1>
 
-  <button class="player-btn" id="fullscreenBtn" title="Layar Penuh">
-    <svg id="fsIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
-      <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
-      <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
-      <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+  <button type="button" class="player-btn" id="fullscreenBtn" aria-label="Layar penuh">
+    <svg id="fsIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true">
+      <path d="M8 3H3v5"/>
+      <path d="M21 8V3h-5"/>
+      <path d="M3 16v5h5"/>
+      <path d="M16 21h5v-5"/>
     </svg>
-    <span>Layar Penuh</span>
+    <span>Layar penuh</span>
   </button>
 
-  <a id="openNewTab" class="player-btn" target="_blank" rel="noopener">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-    <span>Tab Baru</span>
+  <a id="openNewTab" class="player-btn" target="_blank" rel="noopener" aria-label="Buka game di tab baru">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M10 5H4v15h15v-6"/><path d="M14 4h6v6"/><path d="M20 4 11 13"/></svg>
+    <span>Tab baru</span>
   </a>
-</div>
+</header>
 
-<div class="player-wrap" id="playerWrap">
-  <div id="loading" class="player-loading">
-    <div class="spinner"></div>
-    <p>Memuat game...</p>
-    <small>Jika tidak muncul dalam 6 detik, akan ada tombol alternatif.</small>
+<main class="player-wrap" id="playerWrap">
+  <div id="loading" class="player-loading" role="status">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Memuat game</p>
+    <small>Kalau belum muncul setelah 6 detik, tombol untuk membukanya di tab baru akan tampil.</small>
   </div>
 
-  <iframe id="gameFrame" class="game-frame hidden" allowfullscreen
+  <iframe id="gameFrame" class="game-frame hidden" title="Game" width="1280" height="720" allowfullscreen
     allow="autoplay; fullscreen; gamepad; microphone; camera; clipboard-write"></iframe>
 
   <div id="fallback" class="player-fallback hidden">
-    <div class="fallback-icon">🚫</div>
-    <h2>Game tidak bisa di-embed</h2>
-    <p>Situs ini melarang dijalankan di dalam website lain (proteksi <code>X-Frame-Options</code>).</p>
-    <a id="fallbackBtn" class="fallback-btn" target="_blank" rel="noopener">
-      Buka di Tab Baru
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-    </a>
+    <h2>Game ini tidak bisa dibuka di sini</h2>
+    <p>Situs aslinya melarang dijalankan di dalam website lain (proteksi <code>X-Frame-Options</code>).</p>
+    <a id="fallbackBtn" class="fallback-btn" target="_blank" rel="noopener">Buka di tab baru</a>
   </div>
-</div>
+</main>
 
 <script src="script.js"></script>
 </body>

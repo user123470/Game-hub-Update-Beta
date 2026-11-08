@@ -8,3 +8,4 @@
 5. Redeploy.
 
 Admin: di layar password, ketik kode admin → panel admin terbuka.
+- `GETKEY_CODE` : kode untuk membuka panel pembuat kode masuk (default: sudah diisi di kode)
