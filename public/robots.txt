@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://playlume.my.id/sitemap.xml
