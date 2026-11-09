@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /play.html
 
 Sitemap: https://playlume.my.id/sitemap.xml
